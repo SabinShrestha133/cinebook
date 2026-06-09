@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { RegisterFormData, registerSchema } from "@/app/frontend/_components/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState, useTransition } from "react";
+import { useState, useTransition, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { handleRegisterUser } from "@/lib/actions/auth-action";
@@ -17,6 +17,7 @@ export default function RegisterPage() {
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const submittingRef = useRef(false);
 
     const {
         register,
@@ -27,16 +28,20 @@ export default function RegisterPage() {
     });
 
     const onSubmit = (data: RegisterFormData) => {
+        if (submittingRef.current) return;
+        submittingRef.current = true;
         setError("");
         startTransition(async () => {
             try {
                 const result = await handleRegisterUser(data);
+                submittingRef.current = false;
                 if (result.success) {
-                    router.push("/login");
+                    router.push("/frontend/login");
                 } else {
                     setError(result.message || "Registration failed");
                 }
             } catch (error: any) {
+                submittingRef.current = false;
                 setError(error?.message || "Registration failed");
             }
         });
@@ -238,108 +243,11 @@ export default function RegisterPage() {
                 {/* Login link */}
                 <p className="text-center text-gray-500 text-sm">
                     Already have an account?{" "}
-                    <Link href="/login" className="text-yellow-400 hover:text-yellow-300 font-semibold transition">
+                    <Link href="/frontend/login" className="text-yellow-400 hover:text-yellow-300 font-semibold transition">
                         Sign in
                     </Link>
                 </p>
             </div>
         </div>
     );
-}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full bg-[#111] border border-white/10 rounded-lg pl-10 pr-4 py-2.5 text-sm text-white placeholder-gray-600 outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400/20 transition"
-              />
-            </div>
-          </div>
-
-          {/* Email */}
-          <div>
-            <label className="block text-gray-400 text-xs mb-1.5 tracking-wide">Email Address</label>
-            <div className="relative">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500">
-                <Mail className="w-4 h-4" />
-              </span>
-              <input
-                type="email"
-                placeholder="name@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-[#111] border border-white/10 rounded-lg pl-10 pr-4 py-2.5 text-sm text-white placeholder-gray-600 outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400/20 transition"
-              />
-            </div>
-          </div>
-
-          {/* Password */}
-          <div>
-            <label className="block text-gray-400 text-xs mb-1.5 tracking-wide">Password</label>
-            <div className="relative">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500">
-                <Lock className="w-4 h-4" />
-              </span>
-              <input
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-[#111] border border-white/10 rounded-lg pl-10 pr-4 py-2.5 text-sm text-white placeholder-gray-600 outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400/20 transition"
-              />
-            </div>
-          </div>
-
-          {/* Confirm Password */}
-          <div>
-            <label className="block text-gray-400 text-xs mb-1.5 tracking-wide">Confirm Password</label>
-            <div className="relative">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500">
-                <Shield className="w-4 h-4" />
-              </span>
-              <input
-                type="password"
-                placeholder="••••••••"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full bg-[#111] border border-white/10 rounded-lg pl-10 pr-4 py-2.5 text-sm text-white placeholder-gray-600 outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400/20 transition"
-              />
-            </div>
-          </div>
-
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-yellow-400 hover:bg-yellow-300 text-black text-sm font-bold py-3 rounded-lg tracking-wider uppercase transition shadow-lg shadow-yellow-400/10 mt-1"
-          >
-            {loading ? (
-              <span className="flex items-center justify-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Creating…
-              </span>
-            ) : (
-              "Create Account"
-            )}
-          </button>
-        </form>
-
-        {/* Footer links */}
-        <div className="mt-6 text-center space-y-2">
-          <p className="text-gray-500 text-sm">
-            Already have an account?{" "}
-            <button
-              type="button"
-              onClick={() => router.push("/frontend/login")}
-              className="text-yellow-400 font-semibold hover:text-yellow-300 hover:underline transition"
-            >
-              Login
-            </button>
-          </p>
-          <p className="text-gray-700 text-xs">
-            <button type="button" className="hover:text-gray-500 transition">Terms of Service</button>
-            {" • "}
-            <button type="button" className="hover:text-gray-500 transition">Privacy Policy</button>
-          </p>
-        </div>
-      </div>
-    </div>
-  );
 }

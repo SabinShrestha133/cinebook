@@ -1,5 +1,3 @@
-"use server";
-
 import { login, register } from "../api/auth";
 
 export const handleLoginUser = async (data: any) => {

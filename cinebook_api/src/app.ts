@@ -10,20 +10,19 @@ import userRoutes from "./routes/user.route";
 
 const app: Application = express();
 const corsOptions = {
-    origin: ["http://localhost:3000", "http://localhost:3001", "*"], // Allow frontend URLs
+    origin: ["http://localhost:3000", "http://localhost:3001", "*"], 
     successStatus: 200,
     credentials: true
 }
-app.use(cors(corsOptions)); // enable CORS for all routes
+app.use(cors(corsOptions)); 
 
 app.use(express.json()); // json input
-app.use(express.urlencoded({ extended: true })); // x-www-form-urlencoded
-app.use(morgan("combined")); // log all requests
+app.use(express.urlencoded({ extended: true }));
+app.use(morgan("combined")); 
 
-app.use("/api/auth", userRoutes); // user related routes (match frontend expectations)
-app.use("/api/v1/auth", userRoutes); // also support v1 routes for backward compatibility
+app.use("/api/auth", userRoutes); 
+app.use("/api/v1/auth", userRoutes); 
 
-// global api handler (at the last)
 app.use(
     (req: Request, res: Response) => {
         return res.status(404).json({ message: "API not found" });

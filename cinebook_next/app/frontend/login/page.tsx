@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { LoginFormData, loginSchema } from "@/app/frontend/_components/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState, useTransition } from "react";
+import { useState, useTransition, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { handleLoginUser } from "@/lib/actions/auth-action";
@@ -16,6 +16,7 @@ export default function LoginPage() {
     const [error, setError] = useState("");
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
+    const submittingRef = useRef(false);
 
     const {
         register,
@@ -26,16 +27,20 @@ export default function LoginPage() {
     });
 
     const onSubmit = (data: LoginFormData) => {
+        if (submittingRef.current) return;
+        submittingRef.current = true;
         setError("");
         startTransition(async () => {
             try {
                 const result = await handleLoginUser(data);
+                submittingRef.current = false;
                 if (result.success) {
                     router.push("/dashboard");
                 } else {
                     setError(result.message || "Login failed");
                 }
             } catch (error: any) {
+                submittingRef.current = false;
                 setError(error?.message || "Login failed");
             }
         });
@@ -154,7 +159,7 @@ export default function LoginPage() {
                 {/* Register link */}
                 <p className="text-center text-gray-500 text-sm">
                     Don&apos;t have an account?{" "}
-                    <Link href="/register" className="text-yellow-400 hover:text-yellow-300 font-semibold transition">
+                    <Link href="/frontend/register" className="text-yellow-400 hover:text-yellow-300 font-semibold transition">
                         Create one
                     </Link>
                 </p>
