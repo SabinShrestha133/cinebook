@@ -26,3 +26,23 @@ export const loginSchema = z.object({
 });
 
 export type LoginFormData = z.infer<typeof loginSchema>;
+
+export const profileSchema = z.object({
+    name: z.string().min(2, "Name must be at least 2 characters long").optional().or(z.literal("")),
+    email: z.email("Invalid email address"),
+    phone: z.string().optional().or(z.literal("")),
+    profileImage: z.any().optional(),
+});
+
+export type ProfileFormData = z.infer<typeof profileSchema>;
+
+export const passwordSchema = z.object({
+    currentPassword: z.string().min(6, "Current password must be at least 6 characters long"),
+    newPassword: z.string().min(6, "New password must be at least 6 characters long"),
+    confirmPassword: z.string().min(6, "Confirm password must be at least 6 characters long"),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+});
+
+export type PasswordFormData = z.infer<typeof passwordSchema>;

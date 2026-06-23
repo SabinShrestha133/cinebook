@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useTransition, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { handleLoginUser } from "@/lib/actions/auth-action";
+import { useAuth } from "@/lib/contexts/AuthContext";
 import { Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
 import Image from "next/image";
 import logo from "@/app/assets/LogoCB.png";
@@ -17,6 +17,7 @@ export default function LoginPage() {
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
     const submittingRef = useRef(false);
+    const { login } = useAuth();
 
     const {
         register,
@@ -32,16 +33,16 @@ export default function LoginPage() {
         setError("");
         startTransition(async () => {
             try {
-                const result = await handleLoginUser(data);
+                await login(data.email, data.password);
                 submittingRef.current = false;
-                if (result.success) {
-                    router.push("/dashboard");
-                } else {
-                    setError(result.message || "Login failed");
+                router.push("/dashboard");
+            } catch (error: unknown) {
+                submittingRef.current = false;
+                let message = "Login failed";
+                if (error instanceof Error) {
+                    message = error.message;
                 }
-            } catch (error: any) {
-                submittingRef.current = false;
-                setError(error?.message || "Login failed");
+                setError(message);
             }
         });
     };

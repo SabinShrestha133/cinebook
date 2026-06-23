@@ -4,7 +4,7 @@ import { authorizedMiddleware } from "../middlewares/authorized.middleware";
 import multer from "multer";
 import path from "path";
 
-const userRouter = Router();
+const profileRouter = Router();
 const userController = new UserController();
 
 const storage = multer.diskStorage({
@@ -31,11 +31,6 @@ const upload = multer({
     limits: { fileSize: 5 * 1024 * 1024 }
 });
 
-userRouter.get("/whoami", authorizedMiddleware, userController.whoami);
-userRouter.put("/update", authorizedMiddleware, upload.single("profileImage"), userController.updateProfile);
+profileRouter.patch("/update", authorizedMiddleware, upload.single("profileImage"), userController.updateProfile);
 
-userRouter.post("/", userController.createUser);
-userRouter.post("/register", userController.createUser);
-userRouter.post("/login", userController.loginUser);
-
-export default userRouter;
+export default profileRouter;
