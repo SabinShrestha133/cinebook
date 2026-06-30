@@ -81,7 +81,9 @@ export const updateProfile = async (formData: FormData) => {
         }
         throw new Error("Update user failed");
     } finally {
-        localStorage.removeItem("user");
+        if (typeof window !== "undefined") {
+            localStorage.removeItem("user");
+        }
     }
 };
 

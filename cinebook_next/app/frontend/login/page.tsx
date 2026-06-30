@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { LoginFormData, loginSchema } from "@/app/frontend/_components/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState, useTransition, useRef } from "react";
+import { useState, useTransition, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/contexts/AuthContext";
@@ -16,7 +16,6 @@ export default function LoginPage() {
     const [error, setError] = useState("");
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
-    const submittingRef = useRef(false);
     const { login } = useAuth();
 
     const {
@@ -27,17 +26,13 @@ export default function LoginPage() {
         resolver: zodResolver(loginSchema),
     });
 
-    const onSubmit = (data: LoginFormData) => {
-        if (submittingRef.current) return;
-        submittingRef.current = true;
+    const onSubmit = useCallback(async (data: LoginFormData) => {
         setError("");
         startTransition(async () => {
             try {
                 await login(data.email, data.password);
-                submittingRef.current = false;
                 router.push("/dashboard");
             } catch (error: unknown) {
-                submittingRef.current = false;
                 let message = "Login failed";
                 if (error instanceof Error) {
                     message = error.message;
@@ -45,7 +40,7 @@ export default function LoginPage() {
                 setError(message);
             }
         });
-    };
+    }, [router, startTransition, login]);
 
     return (
         <div className="min-h-screen bg-black flex items-center justify-center p-6 relative">
@@ -64,7 +59,7 @@ export default function LoginPage() {
                 {/* Logo */}
                 <div className="flex flex-col items-center mb-8">
                     <div className="mb-3">
-                        <Image src={logo} alt="CineBook Logo" width={52} height={52} />
+                        <Image src={logo} alt="CineBook Logo" width={52} height={52} className="w-auto h-auto" />
                     </div>
                     <h1 className="text-white text-2xl font-bold tracking-[0.15em] uppercase">
                         Cine<span className="text-[#e63329]">Book</span>

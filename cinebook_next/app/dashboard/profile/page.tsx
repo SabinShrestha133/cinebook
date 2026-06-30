@@ -3,13 +3,21 @@
 import { useForm } from "react-hook-form";
 import { profileSchema, type ProfileFormData } from "@/app/frontend/_components/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { handleWhoami, handleUpdateUser } from "@/lib/actions/auth-action";
-import { API_BASE_URL } from "@/lib/api/endpoints";
 import { Camera, Loader2, Save } from "lucide-react";
 import Image from "next/image";
 import { toast } from "react-toastify";
+
+interface UserData {
+    name?: string;
+    username?: string;
+    email?: string;
+    phone?: string;
+    phoneNumber?: string;
+    profilePicture?: string;
+}
 
 export default function ProfilePage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,16 +40,16 @@ export default function ProfilePage() {
             setFetching(true);
             const result = await handleWhoami();
             if (result.success && result.data) {
-                const payload = result.data as { data?: { user?: Record<string, unknown> }; user?: Record<string, unknown> };
-                const userData = payload?.data?.user ?? payload?.user ?? payload;
+                const rawData = result.data as Record<string, unknown>;
+                const userData: UserData = (rawData.data as Record<string, unknown>)?.user as UserData ?? (rawData.user as UserData) ?? rawData as UserData;
                 reset({
-                    name: userData?.name as string || userData?.username as string || "",
-                    email: userData?.email as string || "",
-                    phone: (userData?.phone as string) || "",
+                    name: userData?.name ?? userData?.username ?? "",
+                    email: userData?.email ?? "",
+                    phone: userData?.phoneNumber ?? userData?.phone ?? "",
                     profileImage: undefined,
                 });
-                if (userData?.profileImage) {
-                    setImagePreview(userData.profileImage as string);
+                if (userData?.profilePicture) {
+                    setImagePreview(userData.profilePicture);
                 }
             }
             setFetching(false);
@@ -49,13 +57,13 @@ export default function ProfilePage() {
         fetchUser();
     }, [reset]);
 
-    const onSubmit = async (data: ProfileFormData) => {
+    const onSubmit = useCallback(async (data: ProfileFormData) => {
         setIsSubmitting(true);
         try {
             const formData = new FormData();
             if (data.name) formData.append("name", data.name);
             if (data.email) formData.append("email", data.email);
-            if (data.phone) formData.append("phone", data.phone);
+            if (data.phone) formData.append("phoneNumber", data.phone);
             if (data.profileImage && data.profileImage instanceof File) {
                 formData.append("profileImage", data.profileImage);
             }
@@ -76,7 +84,7 @@ export default function ProfilePage() {
         } finally {
             setIsSubmitting(false);
         }
-    };
+    }, [router]);
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -121,7 +129,7 @@ export default function ProfilePage() {
                             <div className="relative w-24 h-24 rounded-full bg-[#222] border-2 border-white/10 overflow-hidden flex items-center justify-center">
                                 {imagePreview ? (
                                     <Image 
-                                        src={imagePreview.startsWith("http") ? imagePreview : `${API_BASE_URL}${imagePreview}`} 
+                                        src={imagePreview} 
                                         alt="Profile" 
                                         fill 
                                         className="object-cover" 

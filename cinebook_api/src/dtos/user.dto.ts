@@ -39,3 +39,12 @@ export const UpdateProfileDTO = z.object({
 });
 
 export type UpdateProfileDTO = z.infer<typeof UpdateProfileDTO> & { phoneNumber?: string };
+
+export const UpdateUserDTO = z.object({
+    email: z.email("Invalid email address").optional(),
+    username: z.string().min(3, "Username must be at least 3 characters long").optional(),
+    password: z.string().min(6, "Password must be at least 6 characters long").optional(),
+    imageUrl: z.string().optional()
+});
+
+export type UpdateUserDTO = z.infer<typeof UpdateUserDTO>;

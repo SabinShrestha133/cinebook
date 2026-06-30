@@ -1,41 +1,36 @@
 import { UserController } from "../controllers/user.controller";
 import { Router } from "express";
 import { authorizedMiddleware } from "../middlewares/authorized.middleware";
-import multer from "multer";
-import path from "path";
+import { uploads } from "../middlewares/upload.middleware";
 
 const userRouter = Router();
 const userController = new UserController();
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, path.join(__dirname, "../../uploads/profiles"));
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-        cb(null, uniqueSuffix + path.extname(file.originalname));
-    }
-});
-
-const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-    if (file.mimetype.startsWith("image/")) {
-        cb(null, true);
-    } else {
-        cb(new Error("Only image files are allowed"));
-    }
-};
-
-const upload = multer({
-    storage,
-    fileFilter,
-    limits: { fileSize: 5 * 1024 * 1024 }
-});
-
-userRouter.get("/whoami", authorizedMiddleware, userController.whoami);
-userRouter.put("/update", authorizedMiddleware, upload.single("profileImage"), userController.updateProfile);
-
-userRouter.post("/", userController.createUser);
 userRouter.post("/register", userController.createUser);
 userRouter.post("/login", userController.loginUser);
+
+userRouter.put(
+    "/update",
+    authorizedMiddleware, // only logged in users can update profile -> req.user
+    uploads.single("profileImage"), // handle profile image upload -> req.file
+    userController.updateUser
+);
+
+userRouter.get(
+    "/whoami",
+    authorizedMiddleware,  // req.user -> logged in
+    userController.whoami
+); // get logged in user info  
+
+
+userRouter.post(
+    "/request-password-reset",
+    userController.sendResetPasswordEmail
+);
+
+userRouter.post(
+    "/reset-password/:token",
+    userController.resetPassword
+);
 
 export default userRouter;
