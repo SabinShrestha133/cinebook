@@ -25,6 +25,7 @@ export default function PasswordPage() {
         setIsSubmitting(true);
         try {
             const formData = new FormData();
+            formData.append("currentPassword", data.currentPassword);
             formData.append("password", data.newPassword);
 
             const result = await handleUpdateUser(formData);

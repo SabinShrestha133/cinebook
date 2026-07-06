@@ -26,15 +26,29 @@ export class UserController {
     }
 
     async loginUser(req: Request, res: Response) {
+        console.log("[CTRL] loginUser hit");
+        console.log("[CTRL] body:", req.body);
+
         try {
             const parsedData = LoginUserDTO.safeParse(req.body);
+
             if (!parsedData.success) {
-                return ApiResponseHelper
-                    .error(res, z.prettifyError(parsedData.error), 400);
+                console.log("[CTRL] Login DTO validation failed");
+                return ApiResponseHelper.error(
+                    res,
+                    z.prettifyError(parsedData.error),
+                    400
+                );
             }
+
+            console.log("[CTRL] DTO validation passed");
+
             const { user, token } = await userService.loginUser(parsedData.data);
+
+            console.log("[CTRL] loginUser success");
             return ApiResponseHelper.success(res, { user, token }, "Login successful");
-        } catch (error: Error | any | unknown) {
+        } catch (error: any) {
+            console.error("[CTRL] loginUser error:", error);
             return ApiResponseHelper.error(
                 res,
                 error.message || "Internal Server Error",
@@ -56,7 +70,7 @@ export class UserController {
                     .error(res, z.prettifyError(parsedData.error), 400);
             }
             if (filename) {
-                parsedData.data.imageUrl = "/uploads/" + filename; // set imageUrl if file uploaded
+                parsedData.data.profilePicture = "/uploads/profiles/" + filename; // set profilePicture if file uploaded
             }
             const updatedUser = await userService.updateUser(userId, parsedData.data);
             return ApiResponseHelper.success(res, updatedUser, "User updated successfully");

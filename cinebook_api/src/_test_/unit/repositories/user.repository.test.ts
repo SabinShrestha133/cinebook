@@ -4,10 +4,10 @@ import { UserMongoRepository } from "../../../repositories/user.repository";
 describe('UserMongoRepository', () => {
     const userRepository = new UserMongoRepository();
     const userData: any = {
+        name: 'Test User',
         username: 'testuser',
         email: 'test@example.com',
-        firstName: 'Test',
-        lastName: 'User',
+        phoneNumber: '1234567890',
         password: 'password123'
     };
     test('should create a new user', async () => {

@@ -27,24 +27,38 @@ export class UserService {
         return user;
     }
 
-    async loginUser(loginData: LoginUserDTO){
+    async loginUser(loginData: LoginUserDTO) {
+        console.log("[SVC] loginUser started");
+        console.log("[SVC] email:", loginData.email);
+        console.log("[SVC] SECRET_KEY exists:", !!SECRET_KEY);
+
         const user = await userRepository.getUserByEmail(loginData.email);
+        console.log("[SVC] user found:", !!user);
+
         if (!user) {
             throw new HttpException(400, "Invalid email");
         }
+
+        console.log("[SVC] comparing password...");
         const isPasswordValid = await bycryptjs.compare(
-            loginData.password,  // client password
-            user.password // database password
+            loginData.password,
+            user.password
         );
+        console.log("[SVC] password valid:", isPasswordValid);
+
         if (!isPasswordValid) {
             throw new HttpException(400, "Invalid password");
         }
+
+        console.log("[SVC] signing jwt...");
         const token = jwt.sign(
-            { id: user._id, email: user.email, role: user.role }, // payload
+            { id: user._id, email: user.email, role: user.role },
             SECRET_KEY,
             { expiresIn: "30d" }
         );
-        return { user, token }
+        console.log("[SVC] jwt created");
+
+        return { user, token };
     }
 
     async updateUser(id: string, updateData: UpdateUserDTO){
@@ -65,8 +79,23 @@ export class UserService {
             }
         }
         if(updateData.password) {
+            if (!updateData.currentPassword) {
+                throw new HttpException(400, "Current password is required");
+            }
+
+            const isCurrentPasswordValid = await bycryptjs.compare(
+                updateData.currentPassword,
+                user.password
+            );
+
+            if (!isCurrentPasswordValid) {
+                throw new HttpException(400, "Current password is incorrect");
+            }
+
             const hashedPassword = await bycryptjs.hash(updateData.password, 10);
             updateData.password = hashedPassword;
+
+            delete (updateData as any).currentPassword;
         }
         const updatedUser = await userRepository.update(id, updateData);
         return updatedUser;
