@@ -10,6 +10,10 @@ import mongoose from "mongoose";
 //  after all tests have completed.
 beforeAll(async () => {
     await connectToMongoDBTest();
+    // ensure clean test DB
+    if (mongoose.connection && mongoose.connection.db) {
+        await mongoose.connection.db.dropDatabase();
+    }
 });
 
 afterAll(async () => {

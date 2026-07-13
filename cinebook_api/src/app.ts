@@ -12,11 +12,19 @@ import cors from "cors";
 import morgan from "morgan";
 import path from "path";
 
-import { PORT, HOST } from "./configs/constant";
-
 import userRoutes from "./routes/user.route";
 import profileRoutes from "./routes/profile.route";
+import movieRoutes from "./routes/movie.route";
+import showtimeRoutes from "./routes/showtime.route";
+import bookingRoutes from "./routes/booking.route";
+import adminRoutes from "./routes/admin.route";
+import recommendationRoutes from "./routes/recommendation.route";
+import superAdminRoutes from "./routes/superadmin.route";
+import hallRoutes from "./routes/hall.route";
+import seatRoutes from "./routes/seat.route";
+import cinemaRoutes from "./routes/cinema.route";
 
+import { PORT, HOST } from "./configs/constant";
 
 const app: Application = express();
 
@@ -148,6 +156,61 @@ app.use(
 );
 
 
+// Movies
+app.use(
+    "/api/v1/movies",
+    movieRoutes
+);
+
+// Showtimes
+app.use(
+    "/api/v1/showtimes",
+    showtimeRoutes
+);
+
+// Bookings
+app.use(
+    "/api/v1/bookings",
+    bookingRoutes
+);
+
+// Cinemas
+app.use(
+    "/api/v1/cinemas",
+    cinemaRoutes
+);
+
+// Admin
+app.use(
+    "/api/v1/admin",
+    adminRoutes
+);
+
+// Halls
+app.use(
+    "/api/v1/halls",
+    hallRoutes
+);
+
+// Seats
+app.use(
+    "/api/v1/seats",
+    seatRoutes
+);
+
+// Recommendations
+app.use(
+    "/api/v1/recommendations",
+    recommendationRoutes
+);
+
+// Super admin
+app.use(
+    "/api/v1/super-admin",
+    superAdminRoutes
+);
+
+
 
 
 
@@ -173,7 +236,6 @@ app.use(
 
     }
 );
-
 
 
 
@@ -208,6 +270,7 @@ app.use(
                 err.status
             );
 
+
         }
 
 
@@ -226,6 +289,8 @@ app.use(
     }
 
 );
+
+
 
 
 

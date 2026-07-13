@@ -2,8 +2,10 @@ import { UserService } from "../services/user.service";
 import { z } from "zod";
 import { CreateUserDTO, LoginUserDTO, UpdateUserDTO } from "../dtos/user.dto";
 import { ApiResponseHelper } from "../utils/apihelper.util";
+import { uploadToCloudinary } from "../utils/cloudinary.util";
 import { Request, Response } from "express";
 import { HttpException } from "../exceptions/http-exception";
+import fs from "fs";
 const userService = new UserService();
 
 export class UserController {
@@ -59,8 +61,7 @@ export class UserController {
 
     async updateUser(req: Request, res: Response) {
         try {
-            const userId = req.user?._id; // logged in user
-            const filename = req.file?.filename; // if file
+            const userId = req.user?._id?.toString(); // logged in user as string
             if (!userId) {
                 return ApiResponseHelper.error(res, "Unauthorized", 401);
             }
@@ -69,8 +70,10 @@ export class UserController {
                 return ApiResponseHelper
                     .error(res, z.prettifyError(parsedData.error), 400);
             }
-            if (filename) {
-                parsedData.data.profilePicture = "/uploads/profiles/" + filename; // set profilePicture if file uploaded
+            if (req.file) {
+                const secureUrl = await uploadToCloudinary(req.file.path, "profiles");
+                parsedData.data.profilePicture = secureUrl;
+                fs.unlink(req.file.path, () => {});
             }
             const updatedUser = await userService.updateUser(userId, parsedData.data);
             return ApiResponseHelper.success(res, updatedUser, "User updated successfully");

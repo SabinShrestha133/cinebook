@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "npx tsx --watch index.ts",
     "start": "npx tsx index.ts",
+    "seed": "npx tsx scripts/seed.ts",
     "start-day2": "node day2.js",
     "test": "jest --verbose --detectOpenHandles"
   },
@@ -38,6 +39,8 @@
     "morgan": "^1.11.0",
     "multer": "^2.2.0",
     "nodemailer": "^9.0.1",
+    "uuid": "^9.0.0",
+    "cloudinary": "^2.1.0",
     "ts-jest": "^29.4.11",
     "tsx": "^4.21.0",
     "zod": "^4.4.3"

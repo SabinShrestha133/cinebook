@@ -20,9 +20,7 @@ export class UserService {
         if (existingUsername) {
             throw new HttpException(400, "Username already exists");
         }
-        // hash password
-        const hashedPassword = await bycryptjs.hash(userData.password, 10);
-        userData.password = hashedPassword;
+        // password hashing is handled by the model's pre-save hook
         const user = await userRepository.createUser(userData);
         return user;
     }

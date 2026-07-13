@@ -4,6 +4,8 @@ import protectedAxios from "./axios-instance";
 import { API } from "./endpoints";
 import { setToken, removeToken } from "@/lib/utils/auth-storage";
 
+export type UserRole = "user" | "admin" | "super_admin";
+
 export interface User {
     id: string;
     name?: string;
@@ -13,6 +15,7 @@ export interface User {
     email: string;
     phone?: string;
     profileImage?: string;
+    role?: UserRole;
 }
 
 export interface AuthResponse {
