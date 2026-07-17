@@ -18,6 +18,10 @@ export class SuperAdminService {
     async setActive(id: string, isActive: boolean) {
         return userRepo.update(id, { isActive } as Partial<IUser>);
     }
+
+    async updateAdmin(id: string, payload: { isActive?: boolean; permissions?: string[] }) {
+        return userRepo.update(id, payload as Partial<IUser>);
+    }
 }
 
 export const superAdminService = new SuperAdminService();

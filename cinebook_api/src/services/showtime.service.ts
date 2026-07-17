@@ -15,12 +15,20 @@ export class ShowtimeService {
         return showtimeRepo.find(query, options);
     }
 
-    async reserveSeats(showtimeId: string, seatIds: string[]) {
-        return showtimeRepo.reserveSeats(showtimeId, seatIds);
+    async reserveSeats(showtimeId: string, seatIds: string[], bookingId: string, expiresAt: Date) {
+        return showtimeRepo.reserveSeats(showtimeId, seatIds, bookingId, expiresAt);
     }
 
-    async unreserveSeats(showtimeId: string, seatIds: string[]) {
-        return showtimeRepo.unreserveSeats(showtimeId, seatIds);
+    async unreserveSeats(showtimeId: string, bookingId: string) {
+        return showtimeRepo.unreserveSeats(showtimeId, bookingId);
+    }
+
+    async confirmSeats(showtimeId: string, bookingId: string) {
+        return showtimeRepo.confirmSeats(showtimeId, bookingId);
+    }
+
+    async releaseExpiredReservations() {
+        return showtimeRepo.releaseExpiredReservations();
     }
 }
 
