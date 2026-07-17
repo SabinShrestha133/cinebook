@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { handleGetDashboard } from "@/lib/actions/admin-action";
 import { type DashboardSummary } from "@/lib/api/admin";
-import { Loader2, Ticket, Film, Building2, DollarSign, PlusCircle, CalendarPlus } from "lucide-react";
+import { Loader2, Ticket, Film, Building2, DollarSign, CalendarPlus, Users, LayoutGrid, BarChart3 } from "lucide-react";
 
 function AdminDashboardContent() {
     const [summary, setSummary] = useState<DashboardSummary | null>(null);
@@ -45,26 +45,40 @@ function AdminDashboardContent() {
           ]
         : [];
 
+    const quickActions = [
+        { href: "/admin/dashboard", label: "Analytics", icon: BarChart3, primary: true },
+        { href: "/admin/users", label: "Users", icon: Users },
+        { href: "/admin/movies", label: "Movies", icon: Film },
+        { href: "/admin/cinemas", label: "Cinemas", icon: Building2 },
+        { href: "/admin/showtimes/new", label: "New Showtime", icon: CalendarPlus },
+        { href: "/admin/halls/new", label: "New Hall", icon: LayoutGrid },
+    ];
+
     return (
         <div className="space-y-8">
-            <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex flex-col gap-4">
                 <div>
-                    <h1 className="text-white text-3xl font-bold tracking-wide">Analytics</h1>
-                    <p className="text-gray-500 text-sm mt-1">Platform overview and statistics</p>
+                    <h1 className="text-white text-3xl font-bold tracking-wide">Admin Dashboard</h1>
+                    <p className="text-gray-500 text-sm mt-1">Platform overview and management</p>
                 </div>
-                <div className="flex gap-3">
-                    <Link
-                        href="/admin/movies/new"
-                        className="flex items-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-black text-sm font-bold px-4 py-2.5 rounded-lg transition"
-                    >
-                        <PlusCircle className="w-4 h-4" /> New Movie
-                    </Link>
-                    <Link
-                        href="/admin/showtimes/new"
-                        className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition"
-                    >
-                        <CalendarPlus className="w-4 h-4" /> New Showtime
-                    </Link>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                    {quickActions.map((action) => {
+                        const Icon = action.icon;
+                        return (
+                            <Link
+                                key={action.href}
+                                href={action.href}
+                                className={`flex flex-col items-center justify-center gap-2 rounded-2xl border px-4 py-4 text-center transition ${
+                                    action.primary
+                                        ? "bg-yellow-400 border-yellow-400 text-black hover:bg-yellow-300"
+                                        : "bg-white/5 border-white/10 text-white hover:border-yellow-400 hover:text-yellow-300"
+                                }`}
+                            >
+                                <Icon className="w-5 h-5" />
+                                <span className="text-xs font-bold uppercase tracking-wide">{action.label}</span>
+                            </Link>
+                        );
+                    })}
                 </div>
             </div>
 

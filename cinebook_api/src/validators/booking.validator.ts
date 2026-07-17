@@ -7,3 +7,15 @@ export const createBookingSchema = z.object({
     hallId: z.string().min(1),
     seats: z.array(z.object({ seatId: z.string().min(1), label: z.string().optional(), price: z.number() })).min(1),
 });
+
+export const initiatePaymentSchema = z.object({
+    customerInfo: z.object({
+        name: z.string().min(1),
+        email: z.string().email(),
+        phone: z.string().min(1),
+    }),
+});
+
+export const verifyPaymentSchema = z.object({
+    pidx: z.string().min(1),
+});
