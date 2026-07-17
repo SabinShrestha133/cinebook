@@ -8,5 +8,6 @@ const router = Router();
 router.get("/admins", authenticate, superAdminMiddleware, superAdminController.listAdmins.bind(superAdminController));
 router.post("/admins", authenticate, superAdminMiddleware, superAdminController.createAdmin.bind(superAdminController));
 router.put("/admins/:id/active", authenticate, superAdminMiddleware, superAdminController.setActive.bind(superAdminController));
+router.put("/admins/:id", authenticate, superAdminMiddleware, superAdminController.updateAdmin.bind(superAdminController));
 
 export default router;
