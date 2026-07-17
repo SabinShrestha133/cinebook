@@ -1,15 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { fetchMovies } from "@/lib/actions/movie-action";
 import { Movie } from "@/lib/api/movie";
 import MovieCard from "@/app/frontend/_components/MovieCard";
 import Link from "next/link";
 
+type Tab = "now_showing" | "upcoming";
+
 export default function MoviesPage() {
     const [movies, setMovies] = useState<Movie[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [activeTab, setActiveTab] = useState<Tab>("now_showing");
 
     useEffect(() => {
         const loadMovies = async () => {
@@ -30,6 +33,14 @@ export default function MoviesPage() {
         loadMovies();
     }, []);
 
+    const displayedMovies = useMemo(() => {
+        const base = movies.filter((m) => m.status !== "archived");
+        return base.filter((m) => m.status === activeTab);
+    }, [movies, activeTab]);
+
+    const nowShowingCount = movies.filter((m) => m.status === "now_showing").length;
+    const upcomingCount = movies.filter((m) => m.status === "upcoming").length;
+
     return (
         <div className="min-h-screen bg-black py-10">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -47,17 +58,42 @@ export default function MoviesPage() {
                     </Link>
                 </div>
 
+                <div className="mb-8">
+                    <div className="inline-flex rounded-full border border-white/10 bg-white/5 p-1">
+                        <button
+                            onClick={() => setActiveTab("now_showing")}
+                            className={`rounded-full px-6 py-2 text-sm font-semibold uppercase tracking-[0.2em] transition ${
+                                activeTab === "now_showing"
+                                    ? "bg-yellow-400 text-black"
+                                    : "text-gray-400 hover:text-white"
+                            }`}
+                        >
+                            Now Showing ({nowShowingCount})
+                        </button>
+                        <button
+                            onClick={() => setActiveTab("upcoming")}
+                            className={`rounded-full px-6 py-2 text-sm font-semibold uppercase tracking-[0.2em] transition ${
+                                activeTab === "upcoming"
+                                    ? "bg-yellow-400 text-black"
+                                    : "text-gray-400 hover:text-white"
+                            }`}
+                        >
+                            Upcoming ({upcomingCount})
+                        </button>
+                    </div>
+                </div>
+
                 {loading ? (
                     <div className="rounded-3xl border border-white/10 bg-[#111] p-10 text-center text-gray-400">Loading movies…</div>
                 ) : error ? (
                     <div className="rounded-3xl border border-rose-500/20 bg-[#111] p-10 text-center text-rose-300">{error}</div>
-                ) : movies.length === 0 ? (
+                ) : displayedMovies.length === 0 ? (
                     <div className="rounded-3xl border border-white/10 bg-[#111] p-10 text-center text-gray-400">
-                        No movies available yet. Check back soon.
+                        {activeTab === "now_showing" ? "No movies showing right now." : "No upcoming movies scheduled."}
                     </div>
                 ) : (
                     <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                        {movies.map((movie) => (
+                        {displayedMovies.map((movie) => (
                             <MovieCard key={movie._id} movie={movie} />
                         ))}
                     </div>

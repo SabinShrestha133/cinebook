@@ -9,6 +9,7 @@ export interface AdminUser {
     username?: string;
     role: "admin" | "super_admin";
     isActive: boolean;
+    permissions?: string[];
 }
 
 export const listAdmins = async (): Promise<AdminUser[]> => {
@@ -44,6 +45,24 @@ export const createAdmin = async (data: Record<string, unknown>) => {
 export const setAdminActive = async (id: string, isActive: boolean) => {
     try {
         const response = await protectedAxios.put(API.SUPER_ADMIN.SET_ACTIVE(id), { isActive });
+        return response.data;
+    } catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+            throw new Error(error.response?.data?.message || "Failed to update admin");
+        }
+        if (error instanceof Error) {
+            throw new Error(error.message || "Failed to update admin");
+        }
+        throw new Error("Failed to update admin");
+    }
+};
+
+export const updateAdmin = async (
+    id: string,
+    data: { isActive?: boolean; permissions?: string[] }
+) => {
+    try {
+        const response = await protectedAxios.put(API.SUPER_ADMIN.UPDATE(id), data);
         return response.data;
     } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
