@@ -1,5 +1,6 @@
 import axios from "axios";
 import protectedAxios from "./axios-instance";
+import publicAxios from "./public-axios";
 import { API } from "./endpoints";
 
 export interface Hall {
@@ -132,7 +133,7 @@ export const generateHallLayout = async (hallId: string): Promise<Hall> => {
 
 export const getSeatsByHall = async (hallId: string): Promise<Seat[]> => {
     try {
-        const response = await protectedAxios.get(API.HALL.SEATS(hallId));
+        const response = await publicAxios.get(API.HALL.SEATS(hallId));
         return response.data?.data ?? [];
     } catch (error: unknown) {
         if (axios.isAxiosError(error)) {

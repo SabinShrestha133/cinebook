@@ -1,5 +1,6 @@
 import axios from "axios";
 import publicAxios from "./public-axios";
+import protectedAxios from "./axios-instance";
 import { API } from "./endpoints";
 
 export interface Movie {
@@ -45,5 +46,20 @@ export const fetchMovieById = async (id: string): Promise<Movie | null> => {
             throw new Error(error.message || "Failed to load movie details");
         }
         throw new Error("Failed to load movie details");
+    }
+};
+
+export const updateMovie = async (id: string, data: Partial<Movie>): Promise<Movie> => {
+    try {
+        const response = await protectedAxios.put(API.MOVIE.UPDATE(id), data);
+        return response.data?.data ?? ({} as Movie);
+    } catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+            throw new Error(error.response?.data?.message || "Failed to update movie");
+        }
+        if (error instanceof Error) {
+            throw new Error(error.message || "Failed to update movie");
+        }
+        throw new Error("Failed to update movie");
     }
 };

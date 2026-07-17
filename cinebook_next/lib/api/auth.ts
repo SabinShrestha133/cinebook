@@ -16,6 +16,7 @@ export interface User {
     phone?: string;
     profileImage?: string;
     role?: UserRole;
+    permissions?: string[];
 }
 
 export interface AuthResponse {
