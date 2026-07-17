@@ -32,6 +32,20 @@ export class SuperAdminController {
             return ApiResponseHelper.error(res, err.message || "Error updating admin", 500);
         }
     }
+
+    async updateAdmin(req: Request, res: Response) {
+        try {
+            const id = String(req.params.id);
+            const { isActive, permissions } = req.body;
+            const updated = await superAdminService.updateAdmin(id, {
+                ...(typeof isActive === "boolean" ? { isActive } : {}),
+                ...(Array.isArray(permissions) ? { permissions } : {}),
+            });
+            return ApiResponseHelper.success(res, updated, "Admin updated");
+        } catch (err: any) {
+            return ApiResponseHelper.error(res, err.message || "Error updating admin", 500);
+        }
+    }
 }
 
 export const superAdminController = new SuperAdminController();
