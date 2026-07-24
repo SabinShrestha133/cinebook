@@ -48,6 +48,15 @@ export const SEAT_TYPES = {
 
 export type SeatType = (typeof SEAT_TYPES)[keyof typeof SEAT_TYPES];
 
+export const SEAT_STATUSES = {
+    ACTIVE: "active",
+    DISABLED: "disabled",
+    HIDDEN: "hidden",
+    MISSING: "missing",
+} as const;
+
+export type SeatStatus = (typeof SEAT_STATUSES)[keyof typeof SEAT_STATUSES];
+
 export const DEFAULT_PAGE = 1;
 export const DEFAULT_LIMIT = 10;
 export const MAX_LIMIT = 100;
