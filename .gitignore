@@ -27,3 +27,13 @@ npm-debug.log*
 
 # Test coverage
 coverage/
+
+# Archives
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+
+# Uploads
+**/uploads/

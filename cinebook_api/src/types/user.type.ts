@@ -1,10 +1,21 @@
 import { z } from "zod";
+
 export const UserSchema = z.object({
-    firstName: z.string().min(1, "First name is required"),
-    lastName: z.string().min(1, "Last name is required"),
+    name: z.string().min(1, "Full name is required"),
     email: z.email("Invalid email address"),
     username: z.string().min(3, "Username must be at least 3 characters long"),
     password: z.string().min(6, "Password must be at least 6 characters long"),
-    role: z.enum(["admin", "user"]).default("user")
+    phoneNumber: z.string().min(10, "Phone number must be at least 10 digits"),
+    role: z.enum(["admin", "user"]).default("user"),
+    profilePicture: z.string().optional()
 });
+
+export const UpdateProfileSchema = z.object({
+    fullName: z.string().min(1, "Full name is required").optional(),
+    email: z.email("Invalid email address").optional(),
+    phoneNumber: z.string().min(10, "Phone number must be at least 10 digits").optional()
+});
+
+export type UpdateProfileType = z.infer<typeof UpdateProfileSchema>;
+
 export type UserType = z.infer<typeof UserSchema>;

@@ -1,12 +1,13 @@
-import app, { PORT } from "./src/app";
+import app, { PORT, HOST } from "./src/app";
 import { connectToMongoDB } from "./src/database/mongodb";
 
 connectToMongoDB();
 
 app.listen(
-    PORT,  // start backend in this PORT
+    PORT,
+    HOST,
     () => {
-        console.log(`🎬 CineBook API Server running at http://localhost:${PORT}`);
+        console.log(`🎬 CineBook API Server running at http://${HOST}:${PORT}`);
     }
 );
 // execute: npm run dev
