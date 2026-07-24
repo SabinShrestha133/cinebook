@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
+import { BookingStatus, PaymentStatus } from "../enums/booking.enums";
 
 export interface IBookedSeat {
     seatId: string;
@@ -15,9 +16,11 @@ export interface IBooking extends Document {
     seats: IBookedSeat[];
     seatCount: number;
     totalAmount: number;
-    bookingStatus: "pending" | "confirmed" | "cancelled" | "refunded";
-    paymentStatus: "pending" | "paid" | "failed" | "refunded";
+    bookingStatus: BookingStatus;
+    paymentStatus: PaymentStatus;
     bookingCode: string;
+    ticketJwt?: string;
+    khaltiPidx?: string;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -38,9 +41,19 @@ const BookingSchema: Schema = new Schema<IBooking>(
         seats: { type: [BookedSeatSchema], required: true },
         seatCount: { type: Number, required: true },
         totalAmount: { type: Number, required: true },
-        bookingStatus: { type: String, default: "pending" },
-        paymentStatus: { type: String, default: "pending" },
+        bookingStatus: {
+            type: String,
+            enum: Object.values(BookingStatus),
+            default: BookingStatus.PendingPayment,
+        },
+        paymentStatus: {
+            type: String,
+            enum: Object.values(PaymentStatus),
+            default: PaymentStatus.Pending,
+        },
         bookingCode: { type: String, required: true, unique: true },
+        ticketJwt: { type: String, required: false },
+        khaltiPidx: { type: String, required: false, index: true },
     },
     { timestamps: true }
 );

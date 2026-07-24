@@ -1,5 +1,11 @@
 import mongoose, { Schema, Document } from "mongoose";
 
+export interface IReservation {
+    seatId: string;
+    bookingId: mongoose.Types.ObjectId;
+    expiresAt: Date;
+}
+
 export interface IShowtime extends Document {
     movieId: mongoose.Types.ObjectId;
     cinemaId: mongoose.Types.ObjectId;
@@ -8,11 +14,18 @@ export interface IShowtime extends Document {
     startTime: string;
     endTime: string;
     ticketPrice: number;
-    bookedSeats: string[]; // array of seatIds
+    bookedSeats: string[]; // array of confirmed seatIds
+    reservations: IReservation[]; // temporary holds with expiry
     status: "active" | "cancelled" | "completed";
     createdAt: Date;
     updatedAt: Date;
 }
+
+const ReservationSchema: Schema = new Schema<IReservation>({
+    seatId: { type: String, required: true },
+    bookingId: { type: Schema.Types.ObjectId, ref: "Booking", required: true },
+    expiresAt: { type: Date, required: true, index: true },
+});
 
 const ShowtimeSchema: Schema = new Schema<IShowtime>(
     {
@@ -24,6 +37,7 @@ const ShowtimeSchema: Schema = new Schema<IShowtime>(
         endTime: { type: String },
         ticketPrice: { type: Number, required: true },
         bookedSeats: { type: [String], default: [] },
+        reservations: { type: [ReservationSchema], default: [] },
         status: { type: String, enum: ["active", "cancelled", "completed"], default: "active" },
     },
     { timestamps: true }

@@ -9,11 +9,19 @@ export class BookingRepository {
         return BookingModel.findById(id).lean();
     }
 
+    async findOne(query: Record<string, unknown>) {
+        return BookingModel.findOne(query).lean();
+    }
+
     async find(query = {}, options = {}) {
         return BookingModel.find(query, null, options).lean();
     }
 
     async update(id: string, data: Partial<IBooking>) {
         return BookingModel.findByIdAndUpdate(id, data, { new: true }).lean();
+    }
+
+    async delete(id: string) {
+        return BookingModel.findByIdAndDelete(id);
     }
 }
