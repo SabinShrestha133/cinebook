@@ -60,6 +60,8 @@ export class BookingController {
         try {
             const { pidx } = req.body;
             const result = await bookingService.verifyPayment(pidx);
+            const bookingId = String(req.body.bookingId);
+            const result = await bookingService.verifyPayment(bookingId, pidx);
             return ApiResponseHelper.success(res, result, "Payment verified");
         } catch (err: any) {
             return ApiResponseHelper.error(res, err.message || "Error verifying payment", 400);

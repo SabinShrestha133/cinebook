@@ -13,7 +13,6 @@ describe("Booking flow", () => {
     let showtime: any;
 
     beforeAll(async () => {
-        // register a user
         const regRes = await request(app)
             .post("/api/v1/auth/register")
             .send({ name: "Test User", email: "test@example.com", username: "testuser", password: "password123", phoneNumber: "1234567890" });
@@ -39,5 +38,7 @@ describe("Booking flow", () => {
         expect(res.status).toBe(201);
         expect(res.body.success).toBe(true);
         expect(res.body.data).toHaveProperty("bookingCode");
+        expect(res.body.data.bookingStatus).toBe("pending_payment");
+        expect(res.body.data.paymentStatus).toBe("pending");
     });
 });
