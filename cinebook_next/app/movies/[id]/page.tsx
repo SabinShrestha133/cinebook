@@ -6,9 +6,11 @@ import { Movie } from "@/lib/api/movie";
 import { Showtime, ShowtimeHall } from "@/lib/api/showtime";
 import { Cinema, fetchCinemas } from "@/lib/api/cinema";
 import { loadMovieDetail, loadShowtimesForMovie } from "@/lib/actions/detail-action";
-import { submitBooking } from "@/lib/actions/booking-action";
+import { submitBooking, payBooking } from "@/lib/actions/booking-action";
 import { getSeatsByHall, type Seat } from "@/lib/api/hall";
-import { Loader2, ArrowLeft, MapPin } from "lucide-react";
+import { Loader2, ArrowLeft, MapPin, Sparkles } from "lucide-react";
+import { useAuth } from "@/lib/contexts/AuthContext";
+import { fetchSeatRecommendations, type SeatRecommendation } from "@/lib/api/seat-recommendation";
 
 interface SeatView {
     seatId: string;
@@ -50,6 +52,10 @@ export default function MovieDetailPage() {
     const [bookingMessage, setBookingMessage] = useState<string | null>(null);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [seatRecs, setSeatRecs] = useState<SeatRecommendation[]>([]);
+    const [seatRecLoading, setSeatRecLoading] = useState(false);
+    const [seatRecError, setSeatRecError] = useState("");
+    const { user } = useAuth();
 
     const cinemasWithShowtimes = useMemo(() => {
         const byCinema = new Map<string, Showtime[]>();
@@ -174,6 +180,26 @@ export default function MovieDetailPage() {
         });
     };
 
+    const handleSmartPick = async () => {
+        if (!selectedShowtime || selectedSeats.length > 0) return;
+        setSeatRecLoading(true);
+        setSeatRecError("");
+        try {
+            const result = await fetchSeatRecommendations(selectedShowtime._id, 2);
+            if (result.success && result.data && result.data.length > 0) {
+                const best = result.data[0];
+                setSeatRecs(result.data);
+                setSelectedSeats(best.seats.map((s) => s.seatId));
+            } else {
+                setSeatRecError(result.message || "No seat recommendations available");
+            }
+        } catch (err: unknown) {
+            setSeatRecError(err instanceof Error ? err.message : "Smart pick failed");
+        } finally {
+            setSeatRecLoading(false);
+        }
+    };
+
     const handleBooking = async () => {
         if (!selectedShowtime || !movie) {
             setError("Please choose a showtime and seats before booking.");
@@ -186,6 +212,7 @@ export default function MovieDetailPage() {
 
         setSaving(true);
         setError(null);
+        setBookingMessage(null);
         try {
             const seatsPayload = selectedSeats.map((seatId) => ({
                 seatId,
@@ -201,11 +228,21 @@ export default function MovieDetailPage() {
                 seats: seatsPayload,
             });
 
-            setBookingMessage(`Booking confirmed! Code: ${booking.bookingCode}`);
-            setSelectedSeats([]);
+            const customerInfo = {
+                name: user?.name || "Customer",
+                email: user?.email || "customer@example.com",
+                phone: user?.phone || "9800000000",
+            };
+
+            const payment = await payBooking(booking._id, customerInfo);
+
+            if (payment.paymentUrl) {
+                window.location.href = payment.paymentUrl;
+            } else {
+                throw new Error("Payment URL not received");
+            }
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : "Booking failed");
-        } finally {
             setSaving(false);
         }
     };
@@ -363,6 +400,39 @@ export default function MovieDetailPage() {
                             <span className="text-sm text-gray-400">Price ${selectedShowtime?.ticketPrice?.toFixed(2) ?? 0} each</span>
                         </div>
 
+                        {selectedShowtime && !seatRecLoading && seatRecs.length > 0 && (
+                            <div className="mt-4 rounded-2xl border border-yellow-400/20 bg-yellow-400/5 p-4">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <Sparkles className="h-4 w-4 text-yellow-400" />
+                                    <p className="text-sm font-semibold text-yellow-300">Smart Pick</p>
+                                </div>
+                                <p className="text-xs text-gray-400">{seatRecs[0].reason} — {seatRecs[0].score}% match</p>
+                            </div>
+                        )}
+
+                        {seatRecLoading && (
+                            <div className="mt-4 flex items-center gap-2 text-sm text-gray-400">
+                                <Loader2 className="h-4 w-4 animate-spin text-yellow-400" />
+                                Finding the best seats…
+                            </div>
+                        )}
+
+                        {seatRecError && (
+                            <p className="mt-2 text-sm text-rose-300">{seatRecError}</p>
+                        )}
+
+                        <div className="mt-4 flex justify-end">
+                            <button
+                                type="button"
+                                onClick={handleSmartPick}
+                                disabled={!selectedShowtime || selectedSeats.length > 0 || seatRecLoading}
+                                className="inline-flex items-center gap-2 rounded-full bg-yellow-400 px-4 py-2 text-sm font-semibold text-black transition hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                <Sparkles className="h-4 w-4" />
+                                Smart Pick
+                            </button>
+                        </div>
+
                         <div className="mt-6">
                             {seatRows.length === 0 ? (
                                 <p className="text-gray-400">Seat layout is not available for the selected showtime.</p>
@@ -459,7 +529,7 @@ export default function MovieDetailPage() {
                                 disabled={saving || selectedSeats.length === 0}
                                 className="w-full rounded-full bg-yellow-400 px-5 py-3 text-sm font-semibold text-black transition disabled:cursor-not-allowed disabled:bg-yellow-400/50"
                             >
-                                {saving ? "Booking…" : "Confirm booking"}
+                                {saving ? "Processing…" : "Proceed to Payment"}
                             </button>
 
                             {bookingMessage && (

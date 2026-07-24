@@ -2,6 +2,10 @@ import { BookingRepository } from "../repositories/booking.repository";
 import { showtimeService } from "./showtime.service";
 import { paymentService } from "./payment.service";
 import { v4 as uuidv4 } from "uuid";
+import jwt from "jsonwebtoken";
+import QRCode from "qrcode";
+import { BookingStatus, PaymentStatus } from "../enums/booking.enums";
+import { SECRET_KEY } from "../configs/constant";
 import { BookingStatus, PaymentStatus } from "../enums/booking.enums";
 
 const bookingRepo = new BookingRepository();
@@ -55,6 +59,36 @@ export class BookingService {
         }
 
         const payment = await paymentService.initiatePayment(bookingId, booking.totalAmount, customerInfo);
+
+        // Save pidx on booking so we can look it up during verification
+        await bookingRepo.update(bookingId, {
+            khaltiPidx: payment.pidx,
+        });
+
+        return { ...payment, bookingId };
+    }
+
+    async verifyPayment(pidx: string) {
+        const verification = await paymentService.verifyPayment(pidx);
+
+        // Look up booking by the pidx we saved during initiation
+        const booking = await bookingRepo.findOne({ khaltiPidx: pidx });
+
+        if (!booking) {
+            throw new Error("Booking not found for this payment");
+        }
+
+        const bookingId = booking._id.toString();
+
+        if (booking.bookingStatus !== BookingStatus.PendingPayment) {
+            throw new Error("Booking is not pending payment");
+        }
+
+        const expectedAmountPaisa = Math.round((booking.totalAmount || 0) * 100);
+        const actualAmountPaisa = verification.total_amount ?? verification.totalAmount;
+
+        if (actualAmountPaisa !== expectedAmountPaisa) {
+            throw new Error(`Payment amount mismatch. Expected ${expectedAmountPaisa}, got ${actualAmountPaisa}`);
         return { ...payment, bookingId };
     }
 
@@ -81,6 +115,19 @@ export class BookingService {
 
         await showtimeService.confirmSeats(booking.showtimeId.toString(), bookingId);
 
+        const ticketJwt = jwt.sign(
+            {
+                bookingId: booking._id.toString(),
+                bookingCode: booking.bookingCode,
+            },
+            SECRET_KEY,
+            { expiresIn: "365d" }
+        );
+
+        await bookingRepo.update(bookingId, {
+            bookingStatus: BookingStatus.Confirmed,
+            paymentStatus: PaymentStatus.Paid,
+            ticketJwt,
         await bookingRepo.update(bookingId, {
             bookingStatus: BookingStatus.Confirmed,
             paymentStatus: PaymentStatus.Paid,
@@ -101,6 +148,48 @@ export class BookingService {
         });
 
         return bookingRepo.findById(bookingId);
+    }
+
+    async verifyTicket(identifier: string) {
+        let booking = await bookingRepo.findOne({ bookingCode: identifier });
+
+        if (!booking) {
+            booking = await bookingRepo.findById(identifier);
+        }
+
+        if (!booking) {
+            throw new Error("Ticket not found");
+        }
+
+        if (booking.bookingStatus === BookingStatus.CheckedIn) {
+            throw new Error("Ticket has already been used");
+        }
+
+        if (booking.bookingStatus !== BookingStatus.Confirmed) {
+            throw new Error("Booking is not confirmed");
+        }
+
+        await bookingRepo.update(booking._id.toString(), {
+            bookingStatus: BookingStatus.CheckedIn,
+        });
+
+        return bookingRepo.findById(booking._id.toString());
+    }
+
+    async getBookingQr(bookingId: string): Promise<Buffer> {
+        const booking = await bookingRepo.findById(bookingId);
+        if (!booking) {
+            throw new Error("Booking not found");
+        }
+        if (!booking.ticketJwt) {
+            throw new Error("Ticket not generated yet");
+        }
+
+        return QRCode.toBuffer(booking.ticketJwt, {
+            width: 400,
+            margin: 2,
+            color: { dark: "#000000", light: "#ffffff" },
+        });
     }
 
     async releaseExpiredBookings() {

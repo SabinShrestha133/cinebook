@@ -19,6 +19,8 @@ export interface IBooking extends Document {
     bookingStatus: BookingStatus;
     paymentStatus: PaymentStatus;
     bookingCode: string;
+    ticketJwt?: string;
+    khaltiPidx?: string;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -50,6 +52,8 @@ const BookingSchema: Schema = new Schema<IBooking>(
             default: PaymentStatus.Pending,
         },
         bookingCode: { type: String, required: true, unique: true },
+        ticketJwt: { type: String, required: false },
+        khaltiPidx: { type: String, required: false, index: true },
     },
     { timestamps: true }
 );

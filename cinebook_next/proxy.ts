@@ -38,7 +38,8 @@ function isAuthorized(pathname: string, role: string): boolean {
     if (pathname.startsWith("/super-admin")) return role === "super_admin";
     if (pathname.startsWith("/admin")) return role === "admin" || role === "super_admin";
     if (pathname.startsWith("/user")) return role === "user";
-    if (pathname === "/movies" || pathname.startsWith("/movies/")) return true;
+    if (pathname === "/movies" || pathname.startsWith("/movies/"))
+    if (pathname === "/booking/verify") return true; return true;
     return false;
 }
 

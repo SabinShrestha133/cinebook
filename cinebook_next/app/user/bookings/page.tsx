@@ -4,6 +4,17 @@ import { useEffect, useState } from "react";
 import { fetchMyBookings, BookingHistoryItem } from "@/lib/api/booking-history";
 import { Loader2 } from "lucide-react";
 
+const asString = (val: unknown): string => (typeof val === "object" && val !== null ? String((val as any)._id ?? "") : String(val ?? ""));
+const movieTitle = (v: unknown) => (typeof v === "object" && v !== null ? (v as any).title : "");
+const cinemaName = (v: unknown) => (typeof v === "object" && v !== null ? (v as any).name : "");
+const hallName = (v: unknown) => (typeof v === "object" && v !== null ? (v as any).name : "");
+
+const formatShowDate = (d?: string) => {
+    if (!d) return "";
+    const date = new Date(d);
+    return isNaN(date.getTime()) ? "" : date.toLocaleDateString();
+};
+
 export default function BookingsPage() {
     const [bookings, setBookings] = useState<BookingHistoryItem[]>([]);
     const [loading, setLoading] = useState(true);
@@ -72,10 +83,17 @@ export default function BookingsPage() {
                             </div>
 
                             <div className="mt-4 text-sm text-gray-400 space-y-2">
-                                <p>Showtime ID: <span className="text-white">{booking.showtimeId}</span></p>
-                                <p>Movie ID: <span className="text-white">{booking.movieId}</span></p>
-                                <p>Hall ID: <span className="text-white">{booking.hallId}</span></p>
-                                <p>Cinema ID: <span className="text-white">{booking.cinemaId}</span></p>
+                                <p>Movie: <span className="text-white">{movieTitle(booking.movieId) || asString(booking.movieId)}</span></p>
+                                <p>Cinema: <span className="text-white">{cinemaName(booking.cinemaId) || asString(booking.cinemaId)}</span></p>
+                                <p>Hall: <span className="text-white">{hallName(booking.hallId) || asString(booking.hallId)}</span></p>
+                                <p>
+                                    Showtime:{" "}
+                                    <span className="text-white">
+                                        {typeof booking.showtimeId === "object" && booking.showtimeId
+                                            ? `${formatShowDate(booking.showtimeId.showDate)} ${booking.showtimeId.startTime ?? ""}${booking.showtimeId.endTime ? ` - ${booking.showtimeId.endTime}` : ""}`
+                                            : asString(booking.showtimeId)}
+                                    </span>
+                                </p>
                             </div>
                         </div>
                     ))}

@@ -9,6 +9,10 @@ export class BookingRepository {
         return BookingModel.findById(id).lean();
     }
 
+    async findOne(query: Record<string, unknown>) {
+        return BookingModel.findOne(query).lean();
+    }
+
     async find(query = {}, options = {}) {
         return BookingModel.find(query, null, options).lean();
     }

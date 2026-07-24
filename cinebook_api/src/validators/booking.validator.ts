@@ -19,3 +19,8 @@ export const initiatePaymentSchema = z.object({
 export const verifyPaymentSchema = z.object({
     pidx: z.string().min(1),
 });
+
+export const verifyTicketSchema = z.object({
+    bookingCode: z.string().min(1).optional(),
+    bookingId: z.string().min(1).optional(),
+});

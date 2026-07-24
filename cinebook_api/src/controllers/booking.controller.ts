@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { bookingService } from "../services/booking.service";
 import { ApiResponseHelper } from "../utils/apihelper.util";
+import { BookingModel } from "../models/booking.model";
 
 export class BookingController {
     async create(req: Request, res: Response) {
@@ -16,7 +17,13 @@ export class BookingController {
     async getMine(req: Request, res: Response) {
         try {
             const userId = req.user?._id;
-            const list = await bookingService.list({ userId });
+            const list = await BookingModel.find({ userId })
+                .populate("movieId", "title")
+                .populate("cinemaId", "name")
+                .populate("hallId", "name")
+                .populate("showtimeId", "showDate startTime endTime")
+                .sort({ createdAt: -1 })
+                .lean();
             return ApiResponseHelper.success(res, list, "User bookings fetched");
         } catch (err: any) {
             return ApiResponseHelper.error(res, err.message || "Error fetching bookings", 500);
@@ -52,6 +59,7 @@ export class BookingController {
     async verifyPayment(req: Request, res: Response) {
         try {
             const { pidx } = req.body;
+            const result = await bookingService.verifyPayment(pidx);
             const bookingId = String(req.body.bookingId);
             const result = await bookingService.verifyPayment(bookingId, pidx);
             return ApiResponseHelper.success(res, result, "Payment verified");
@@ -67,6 +75,32 @@ export class BookingController {
             return ApiResponseHelper.success(res, booking, "Booking cancelled");
         } catch (err: any) {
             return ApiResponseHelper.error(res, err.message || "Error cancelling booking", 400);
+        }
+    }
+
+    async verifyTicket(req: Request, res: Response) {
+        try {
+            const { bookingCode, bookingId } = req.body;
+            const identifier = bookingCode || bookingId;
+            if (!identifier) {
+                return ApiResponseHelper.error(res, "bookingCode or bookingId is required", 400);
+            }
+            const result = await bookingService.verifyTicket(identifier);
+            return ApiResponseHelper.success(res, result, "Ticket verified and checked in");
+        } catch (err: any) {
+            return ApiResponseHelper.error(res, err.message || "Error verifying ticket", 400);
+        }
+    }
+
+    async getQr(req: Request, res: Response) {
+        try {
+            const id = String(req.params.id);
+            const qrBuffer = await bookingService.getBookingQr(id);
+            res.setHeader("Content-Type", "image/png");
+            res.setHeader("Cache-Control", "no-store");
+            res.send(qrBuffer);
+        } catch (err: any) {
+            return ApiResponseHelper.error(res, err.message || "Error generating QR", 400);
         }
     }
 }

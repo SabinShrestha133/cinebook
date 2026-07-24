@@ -14,6 +14,10 @@ export const EMAIL_USER: string =
 export const EMAIL_PASS: string =
     process.env.EMAIL_PASS || "password123";
 export const CLIENT_URL: string =
+    process.env.CLIENT_URL || 'http://localhost:3000';
+
+export const KHALTI_SECRET_KEY: string =
+    process.env.KHALTI_SECRET_KEY || "26d864da638440a7a2170efdd5d09de7";
     process.env.CLIENT_URL || 'http://localhost:3001';
 
 export const KHALTI_SECRET_KEY: string =
@@ -24,3 +28,5 @@ export const KHALTI_VERIFY_URL: string =
     process.env.KHALTI_VERIFY_URL || "https://dev.khalti.com/api/v2/epayment/lookup/";
 export const BOOKING_EXPIRY_MINUTES: number =
     Number(process.env.BOOKING_EXPIRY_MINUTES) || 10;
+export const GEMINI_API_KEY: string =
+    process.env.GEMINI_API_KEY || "";

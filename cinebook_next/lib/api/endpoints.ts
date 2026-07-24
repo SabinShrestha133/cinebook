@@ -36,6 +36,7 @@ export const API = {
         INITIATE_PAYMENT: (id: string) => `/api/v1/bookings/${id}/initiate-payment`,
         VERIFY_PAYMENT: "/api/v1/bookings/verify-payment",
         CANCEL: (id: string) => `/api/v1/bookings/${id}/cancel`,
+        QR: (id: string) => `/api/v1/bookings/${id}/qr`,
     },
     CINEMA: {
         LIST: "/api/v1/cinemas",
@@ -56,6 +57,12 @@ export const API = {
         UPDATE_STATUS: (id: string) => `/api/v1/seats/${id}/status`,
         BULK_UPDATE: "/api/v1/seats/bulk-update",
         BY_HALL: (hallId: string) => `/api/v1/seats/hall/${hallId}`,
+    },
+    SEAT_RECOMMENDATION: {
+        RECOMMEND: "/api/v1/seat-recommendations",
+    },
+    AI_RECOMMENDATION: {
+        MOVIES: "/api/v1/ai/recommendations/movies",
     },
 };
 

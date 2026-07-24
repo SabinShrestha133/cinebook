@@ -28,6 +28,7 @@ export interface Booking {
     bookingStatus: string;
     paymentStatus: string;
     bookingCode: string;
+    ticketJwt?: string;
     pidx?: string;
     paymentUrl?: string;
 }
@@ -62,9 +63,9 @@ export const initiatePayment = async (bookingId: string, customerInfo: { name: s
     }
 };
 
-export const verifyPayment = async (bookingId: string, pidx: string) => {
+export const verifyPayment = async (pidx: string) => {
     try {
-        const response = await protectedAxios.post(API.BOOKING.VERIFY_PAYMENT, { bookingId, pidx });
+        const response = await protectedAxios.post(API.BOOKING.VERIFY_PAYMENT, { pidx });
         return response.data?.data;
     } catch (error: unknown) {
         if (axios.isAxiosError(error)) {

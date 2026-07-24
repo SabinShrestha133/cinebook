@@ -4,10 +4,10 @@ import { API } from "./endpoints";
 
 export interface BookingHistoryItem {
     _id: string;
-    showtimeId: string;
-    movieId: string;
-    cinemaId: string;
-    hallId: string;
+    showtimeId: { showDate: string; startTime: string; endTime?: string } | string;
+    movieId: { title: string } | string;
+    cinemaId: { name: string } | string;
+    hallId: { name: string } | string;
     seats: { seatId: string; label?: string; price: number }[];
     seatCount: number;
     totalAmount: number;
