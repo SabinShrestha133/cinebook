@@ -8,8 +8,8 @@ export const payBooking = async (bookingId: string, customerInfo: { name: string
     return await initiatePayment(bookingId, customerInfo);
 };
 
-export const verifyBookingPayment = async (bookingId: string, pidx: string) => {
-    return await verifyPayment(bookingId, pidx);
+export const verifyBookingPayment = async (pidx: string) => {
+    return await verifyPayment(pidx);
 };
 
 export const cancelUserBooking = async (bookingId: string) => {
