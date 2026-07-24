@@ -1,0 +1,53 @@
+export const ROLES = {
+    USER: "user",
+    ADMIN: "admin",
+    SUPER_ADMIN: "super_admin",
+} as const;
+
+export type Role = (typeof ROLES)[keyof typeof ROLES];
+
+export const MOVIE_STATUS = {
+    NOW_SHOWING: "now_showing",
+    UPCOMING: "upcoming",
+    ARCHIVED: "archived",
+} as const;
+
+export type MovieStatus = (typeof MOVIE_STATUS)[keyof typeof MOVIE_STATUS];
+
+export const BOOKING_STATUS = {
+    PENDING: "pending",
+    CONFIRMED: "confirmed",
+    CANCELLED: "cancelled",
+    REFUNDED: "refunded",
+} as const;
+
+export type BookingStatus = (typeof BOOKING_STATUS)[keyof typeof BOOKING_STATUS];
+
+export const PAYMENT_STATUS = {
+    PENDING: "pending",
+    PAID: "paid",
+    FAILED: "failed",
+    REFUNDED: "refunded",
+} as const;
+
+export type PaymentStatus = (typeof PAYMENT_STATUS)[keyof typeof PAYMENT_STATUS];
+
+export const SHOWTIME_STATUS = {
+    SCHEDULED: "scheduled",
+    CANCELLED: "cancelled",
+    COMPLETED: "completed",
+} as const;
+
+export type ShowtimeStatus = (typeof SHOWTIME_STATUS)[keyof typeof SHOWTIME_STATUS];
+
+export const SEAT_TYPES = {
+    REGULAR: "regular",
+    PREMIUM: "premium",
+    VIP: "vip",
+} as const;
+
+export type SeatType = (typeof SEAT_TYPES)[keyof typeof SEAT_TYPES];
+
+export const DEFAULT_PAGE = 1;
+export const DEFAULT_LIMIT = 10;
+export const MAX_LIMIT = 100;

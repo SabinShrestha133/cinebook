@@ -14,8 +14,14 @@ const UserMongoSchema: Schema = new Schema<IUser>(
         username: { type: String, required: true, unique: true },
         password: { type: String, required: true },
         phoneNumber: { type: String, required: true },
-        role: { type: String, enum: ["admin", "user"], default: "user" },
-        profilePicture: { type: String }
+        role: {
+            type: String,
+            enum: ["user", "admin", "super_admin"],
+            default: "user",
+        },
+        profilePicture: { type: String },
+        isActive: { type: Boolean, default: true },
+        isVerified: { type: Boolean, default: false },
     },
     {
         timestamps: true

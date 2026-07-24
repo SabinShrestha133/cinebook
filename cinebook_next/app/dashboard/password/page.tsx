@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { passwordSchema, type PasswordFormData } from "@/app/frontend/_components/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { handleUpdateUser } from "@/lib/actions/auth-action";
 import { Lock, Loader2, Save } from "lucide-react";
@@ -21,10 +21,11 @@ export default function PasswordPage() {
         resolver: zodResolver(passwordSchema),
     });
 
-    const onSubmit = async (data: PasswordFormData) => {
+    const onSubmit = useCallback(async (data: PasswordFormData) => {
         setIsSubmitting(true);
         try {
             const formData = new FormData();
+            formData.append("currentPassword", data.currentPassword);
             formData.append("password", data.newPassword);
 
             const result = await handleUpdateUser(formData);
@@ -43,7 +44,7 @@ export default function PasswordPage() {
         } finally {
             setIsSubmitting(false);
         }
-    };
+    }, [router]);
 
     return (
         <div className="max-w-2xl mx-auto">

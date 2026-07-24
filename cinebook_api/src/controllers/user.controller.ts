@@ -1,10 +1,9 @@
 import { UserService } from "../services/user.service";
 import { z } from "zod";
-import { CreateUserDTO, LoginUserDTO, UpdateProfileDTO } from "../dtos/user.dto";
+import { CreateUserDTO, LoginUserDTO, UpdateUserDTO } from "../dtos/user.dto";
 import { ApiResponseHelper } from "../utils/apihelper.util";
 import { Request, Response } from "express";
 import { HttpException } from "../exceptions/http-exception";
-
 const userService = new UserService();
 
 export class UserController {
@@ -12,112 +11,119 @@ export class UserController {
         try {
             const userData = CreateUserDTO.safeParse(req.body);
             if (!userData.success) {
-                return res.status(400).json({
-                    success: false,
-                    message: z.prettifyError(userData.error)
-                });
+                return ApiResponseHelper
+                    .error(res, z.prettifyError(userData.error), 400);
             }
-            const result = await userService.createUser(userData.data);
-            return res.status(201).json({
-                success: true,
-                message: "User registered successfully",
-                token: result.token,
-                user: result.user
-            });
+            const user = await userService.createUser(userData.data);
+            return ApiResponseHelper.success(res, user, "User created successfully");
         } catch (error: Error | any | unknown) {
-            const status = error instanceof HttpException ? error.status : 500;
-            return res.status(status).json({
-                success: false,
-                message: error.message || "Internal Server Error"
-            });
+            return ApiResponseHelper.error(
+                res,
+                error.message || "Internal Server Error",
+                error.status || 500
+            );
         }
     }
 
     async loginUser(req: Request, res: Response) {
+        console.log("[CTRL] loginUser hit");
+        console.log("[CTRL] body:", req.body);
+
         try {
             const parsedData = LoginUserDTO.safeParse(req.body);
+
             if (!parsedData.success) {
-                return res.status(400).json({
-                    success: false,
-                    message: z.prettifyError(parsedData.error)
-                });
+                console.log("[CTRL] Login DTO validation failed");
+                return ApiResponseHelper.error(
+                    res,
+                    z.prettifyError(parsedData.error),
+                    400
+                );
             }
-            const result = await userService.loginUser(parsedData.data);
-            return res.status(200).json({
-                success: true,
-                message: "Login successful",
-                token: result.token,
-                user: result.user
-            });
+
+            console.log("[CTRL] DTO validation passed");
+
+            const { user, token } = await userService.loginUser(parsedData.data);
+
+            console.log("[CTRL] loginUser success");
+            return ApiResponseHelper.success(res, { user, token }, "Login successful");
+        } catch (error: any) {
+            console.error("[CTRL] loginUser error:", error);
+            return ApiResponseHelper.error(
+                res,
+                error.message || "Internal Server Error",
+                error.status || 500
+            );
+        }
+    }
+
+    async updateUser(req: Request, res: Response) {
+        try {
+            const userId = req.user?._id; // logged in user
+            const filename = req.file?.filename; // if file
+            if (!userId) {
+                return ApiResponseHelper.error(res, "Unauthorized", 401);
+            }
+            const parsedData = UpdateUserDTO.safeParse(req.body);
+            if (!parsedData.success) {
+                return ApiResponseHelper
+                    .error(res, z.prettifyError(parsedData.error), 400);
+            }
+            if (filename) {
+                parsedData.data.profilePicture = "/uploads/profiles/" + filename; // set profilePicture if file uploaded
+            }
+            const updatedUser = await userService.updateUser(userId, parsedData.data);
+            return ApiResponseHelper.success(res, updatedUser, "User updated successfully");
         } catch (error: Error | any | unknown) {
-            const status = error instanceof HttpException ? error.status : 500;
-            return res.status(status).json({
-                success: false,
-                message: error.message || "Internal Server Error"
-            });
+            return ApiResponseHelper.error(
+                res,
+                error.message || "Internal Server Error",
+                error.status || 500
+            );
         }
     }
 
     async whoami(req: Request, res: Response) {
         try {
-            const user = req.user;
+            const user = req.user; // logged in user detail
             if (!user) {
-                throw new HttpException(401, "Unauthorized");
+                return ApiResponseHelper.error(res, "Unauthorized", 401);
             }
-            const userObj = user.toObject ? (user as any).toObject() : user;
-            return res.status(200).json({
-                success: true,
-                message: "User fetched successfully",
-                user: {
-                    id: userObj._id?.toString() || userObj.id,
-                    name: userObj.name,
-                    email: userObj.email,
-                    phone: userObj.phoneNumber,
-                    profilePicture: userObj.profilePicture
-                }
-            });
+            return ApiResponseHelper.success(res, user, "User retrieved successfully");
         } catch (error: Error | any | unknown) {
-            const status = error instanceof HttpException ? error.status : 500;
-            return res.status(status).json({
-                success: false,
-                message: error.message || "Internal Server Error"
-            });
+            return ApiResponseHelper.error(
+                res,
+                error.message || "Internal Server Error",
+                error.status || 500
+            );
         }
     }
-
-    async updateProfile(req: Request, res: Response) {
+    async sendResetPasswordEmail(req: Request, res: Response) {
         try {
-            const userId = req.user?._id?.toString();
-            if (!userId) {
-                throw new HttpException(401, "Unauthorized");
+            const email = req.body.email;
+            // can be replaced with DTO
+            if (!email) {
+                throw new HttpException(400, "Email is required");
             }
-
-            const parsedData = UpdateProfileDTO.safeParse(req.body);
-            if (!parsedData.success) {
-                return res.status(400).json({
-                    success: false,
-                    message: z.prettifyError(parsedData.error)
-                });
+            const { token, user } = await userService.sendResetPasswordEmail(email);
+            return ApiResponseHelper.success(res,
+                { token, user }, "Reset password email sent successfully");
+        } catch (error: Error | any) {
+            return ApiResponseHelper.error(res, error.message || "Internal Server Error", error.status || 500);
+        }
+    }
+    async resetPassword(req: Request, res: Response) {
+        try {
+            const token = req.params.token as string;
+            const { newPassword } = req.body;
+            // can be replaced with DTO
+            if (!token || !newPassword) {
+                throw new HttpException(400, "Token and new password are required");
             }
-
-            // Handle file upload if present
-            let profilePicture: string | undefined;
-            if (req.file) {
-                profilePicture = `/uploads/profiles/${req.file.filename}`;
-            }
-
-            const result = await userService.updateProfile(userId, parsedData.data, profilePicture);
-            return res.status(200).json({
-                success: true,
-                message: "Profile updated successfully",
-                user: result
-            });
-        } catch (error: Error | any | unknown) {
-            const status = error instanceof HttpException ? error.status : 500;
-            return res.status(status).json({
-                success: false,
-                message: error.message || "Internal Server Error"
-            });
+            const updatedUser = await userService.resetPassword(token, newPassword);
+            return ApiResponseHelper.success(res, updatedUser, "Password reset successfully");
+        } catch (error: Error | any) {
+            return ApiResponseHelper.error(res, error.message || "Internal Server Error", error.status || 500);
         }
     }
 }

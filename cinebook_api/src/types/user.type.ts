@@ -6,8 +6,10 @@ export const UserSchema = z.object({
     username: z.string().min(3, "Username must be at least 3 characters long"),
     password: z.string().min(6, "Password must be at least 6 characters long"),
     phoneNumber: z.string().min(10, "Phone number must be at least 10 digits"),
-    role: z.enum(["admin", "user"]).default("user"),
-    profilePicture: z.string().optional()
+    role: z.enum(["user", "admin", "super_admin"]).default("user"),
+    profilePicture: z.string().optional(),
+    isActive: z.boolean().default(true),
+    isVerified: z.boolean().default(false),
 });
 
 export const UpdateProfileSchema = z.object({

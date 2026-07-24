@@ -30,18 +30,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setToken(storedToken);
         try {
             const res = await whoami();
-            const payload = res as { data?: { user?: Record<string, unknown> }; user?: Record<string, unknown> };
-            const userData = payload?.data?.user ?? payload?.user ?? payload;
+            const payload = res as { data?: { user?: unknown }; user?: unknown } | unknown;
+            const userData = (payload as { data?: { user?: unknown }; user?: unknown })?.data?.user ?? (payload as { user?: unknown })?.user ?? payload;
             if (userData && typeof userData === "object" && "_id" in userData) {
-                setUser(userData as User);
+                setUser(userData as unknown as User);
             } else {
                 setUser(null);
-                localStorage.removeItem("token");
+                if (typeof window !== "undefined") {
+                    localStorage.removeItem("token");
+                }
                 setToken(null);
             }
         } catch {
             setUser(null);
-            localStorage.removeItem("token");
+            if (typeof window !== "undefined") {
+                localStorage.removeItem("token");
+            }
             setToken(null);
         } finally {
             setLoading(false);

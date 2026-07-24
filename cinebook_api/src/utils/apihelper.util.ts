@@ -16,6 +16,7 @@ export interface PaginationMeta {
     page: number;
     limit: number;
     total: number;
+    totalPages?: number;
 }
 
 export interface ApiResponse<T> {
@@ -23,7 +24,9 @@ export interface ApiResponse<T> {
     success: boolean;
     message: string;
     data: T;
-    meta?: PaginationMeta; // optional
+    meta?: PaginationMeta;
+    pagination?: PaginationMeta;
+    errors?: string[];
 }
 
 export class ApiResponseHelper {
@@ -32,29 +35,31 @@ export class ApiResponseHelper {
         data: T,
         message: string = "Success",
         status: number = 200,
-        meta?: PaginationMeta
+        pagination?: PaginationMeta
     ): Response {
         const response: ApiResponse<T> = {
             status,
             success: true,
             message,
             data,
-            meta
-        }
+            ...(pagination && { pagination, meta: pagination }),
+        };
         return res.status(status).json(response);
     }
+
     static error(
         res: Response,
         message: string = "Error",
         status: number = 500,
-        data?: null
+        errors?: string[]
     ): Response {
         const response: ApiResponse<null> = {
             status,
             success: false,
             message,
-            data
-        }
+            data: null,
+            ...(errors && { errors }),
+        };
         return res.status(status).json(response);
     }
 }

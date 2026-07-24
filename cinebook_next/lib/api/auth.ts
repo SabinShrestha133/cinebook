@@ -1,3 +1,4 @@
+import axios from "axios";
 import publicAxios from "./public-axios";
 import protectedAxios from "./axios-instance";
 import { API } from "./endpoints";
@@ -28,6 +29,9 @@ export const register = async (data: Record<string, unknown>) => {
         const response = await publicAxios.post(API.AUTH.REGISTER, data);
         return response.data as AuthResponse;
     } catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+            throw new Error(error.response?.data?.message || "Registration failed");
+        }
         if (error instanceof Error) {
             throw new Error(error.message || "Registration failed");
         }
@@ -44,6 +48,9 @@ export const login = async (data: { email: string; password: string }) => {
         }
         return result;
     } catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+            throw new Error(error.response?.data?.message || "Login failed");
+        }
         if (error instanceof Error) {
             throw new Error(error.message || "Login failed");
         }
@@ -56,6 +63,9 @@ export const whoami = async () => {
         const response = await protectedAxios.get(API.AUTH.WHOAMI);
         return response.data;
     } catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+            throw new Error(error.response?.data?.message || "Failed to fetch user");
+        }
         if (error instanceof Error) {
             throw new Error(error.message || "Failed to fetch user");
         }
@@ -76,12 +86,17 @@ export const updateProfile = async (formData: FormData) => {
         }
         return result;
     } catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+            throw new Error(error.response?.data?.message || "Update user failed");
+        }
         if (error instanceof Error) {
             throw new Error(error.message || "Update user failed");
         }
         throw new Error("Update user failed");
     } finally {
-        localStorage.removeItem("user");
+        if (typeof window !== "undefined") {
+            localStorage.removeItem("user");
+        }
     }
 };
 

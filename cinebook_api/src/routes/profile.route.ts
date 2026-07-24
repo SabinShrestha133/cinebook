@@ -31,6 +31,6 @@ const upload = multer({
     limits: { fileSize: 5 * 1024 * 1024 }
 });
 
-profileRouter.patch("/update", authorizedMiddleware, upload.single("profileImage"), userController.updateProfile);
+profileRouter.patch("/update", authorizedMiddleware, upload.single("profileImage"), userController.updateUser);
 
 export default profileRouter;
