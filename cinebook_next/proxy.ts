@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 const PUBLIC_PATHS = ["/login", "/register"];
+const PUBLIC_BROWSE_PATHS = ["/movies"];
 const ROLE_HOME: Record<string, string> = {
     user: "/user/dashboard",
     admin: "/admin/dashboard",
@@ -37,6 +38,7 @@ function isAuthorized(pathname: string, role: string): boolean {
     if (pathname.startsWith("/super-admin")) return role === "super_admin";
     if (pathname.startsWith("/admin")) return role === "admin" || role === "super_admin";
     if (pathname.startsWith("/user")) return role === "user";
+    if (pathname === "/movies" || pathname.startsWith("/movies/")) return true;
     return false;
 }
 
@@ -47,15 +49,16 @@ function roleHome(role: string): string {
 export function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
     const role = getRoleFromRequest(request);
-    const isPublic = PUBLIC_PATHS.includes(pathname) || pathname === "/movies";
+    const isPublicAuthPath = PUBLIC_PATHS.includes(pathname);
+    const isBrowsePath = PUBLIC_BROWSE_PATHS.includes(pathname) || pathname.startsWith("/movies/");
 
     if (!role) {
-        if (isPublic) return NextResponse.next();
+        if (isPublicAuthPath || isBrowsePath) return NextResponse.next();
         if (pathname.startsWith("/login") || pathname.startsWith("/register")) return NextResponse.next();
         return NextResponse.redirect(new URL("/login", request.url));
     }
 
-    if (isPublic) {
+    if (isPublicAuthPath) {
         return NextResponse.redirect(new URL(roleHome(role), request.url));
     }
 

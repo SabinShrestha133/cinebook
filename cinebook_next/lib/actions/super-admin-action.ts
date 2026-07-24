@@ -1,4 +1,4 @@
-import { listAdmins, createAdmin, setAdminActive } from "../api/super-admin";
+import { listAdmins, createAdmin, setAdminActive, updateAdmin } from "../api/super-admin";
 import { type AdminUser } from "../api/super-admin";
 
 export const handleListAdmins = async (): Promise<{ success: boolean; data?: AdminUser[]; message?: string }> => {
@@ -28,6 +28,18 @@ export const handleSetAdminActive = async (
     try {
         const data = await setAdminActive(id, isActive);
         return { success: true, data };
+    } catch (error: unknown) {
+        return { success: false, message: (error as Error).message };
+    }
+};
+
+export const handleUpdateAdmin = async (
+    id: string,
+    data: { isActive?: boolean; permissions?: string[] }
+): Promise<{ success: boolean; data?: unknown; message?: string }> => {
+    try {
+        const dataOut = await updateAdmin(id, data);
+        return { success: true, data: dataOut };
     } catch (error: unknown) {
         return { success: false, message: (error as Error).message };
     }

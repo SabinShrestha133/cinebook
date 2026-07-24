@@ -1,9 +1,12 @@
 "use client";
 
-import { useState, type ChangeEvent } from "react";
+import { useState, useEffect, type ChangeEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { handleCreateShowtime } from "@/lib/actions/admin-action";
 import { Loader2, CalendarPlus } from "lucide-react";
+import { browseMovies, type Movie } from "@/lib/api/movie";
+import { fetchCinemas, type Cinema } from "@/lib/api/cinema";
+import { listHalls, type Hall } from "@/lib/api/hall";
 
 function CreateShowtimeContent() {
     const router = useRouter();
@@ -16,15 +19,43 @@ function CreateShowtimeContent() {
         endTime: "",
         ticketPrice: "",
     });
+    const [movies, setMovies] = useState<Movie[]>([]);
+    const [cinemas, setCinemas] = useState<Cinema[]>([]);
+    const [halls, setHalls] = useState<Hall[]>([]);
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    useEffect(() => {
+        browseMovies()
+            .then(setMovies)
+            .catch(() => {});
+        fetchCinemas()
+            .then(setCinemas)
+            .catch(() => {});
+        listHalls()
+            .then((out) => setHalls(out.data))
+            .catch(() => {});
+    }, []);
+
+    const filteredHalls = form.cinemaId ? halls.filter((h) => h.cinemaId === form.cinemaId) : halls;
+
+    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        setForm((prev) => ({ ...prev, [name]: value }));
+        setForm((prev) => {
+            const next = { ...prev, [name]: value };
+            if (name === "cinemaId") {
+                const hallForCinema = halls.find((h) => h.cinemaId === value);
+                if (hallForCinema) {
+                    next.hallId = hallForCinema._id;
+                } else {
+                    next.hallId = "";
+                }
+            }
+            return next;
+        });
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setMessage(null);
@@ -77,15 +108,30 @@ function CreateShowtimeContent() {
             <form onSubmit={handleSubmit} className="space-y-4 bg-[#1a1a1a] border border-white/5 rounded-2xl p-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Field label="Movie ID *">
-                        <input name="movieId" value={form.movieId} onChange={handleChange} required className={inputClass} placeholder="Movie ObjectId" />
+                        <select name="movieId" value={form.movieId} onChange={handleChange} required className={selectClass}>
+                            <option value="">Select movie</option>
+                            {movies.map((m) => (
+                                <option key={m._id} value={m._id}>{m.title || m._id}</option>
+                            ))}
+                        </select>
                     </Field>
                     <Field label="Cinema ID *">
-                        <input name="cinemaId" value={form.cinemaId} onChange={handleChange} required className={inputClass} placeholder="Cinema ObjectId" />
+                        <select name="cinemaId" value={form.cinemaId} onChange={handleChange} required className={selectClass}>
+                            <option value="">Select cinema</option>
+                            {cinemas.map((c) => (
+                                <option key={c._id} value={c._id}>{c.name}{c.city ? ` - ${c.city}` : ""}</option>
+                            ))}
+                        </select>
                     </Field>
                 </div>
 
                 <Field label="Hall ID *">
-                    <input name="hallId" value={form.hallId} onChange={handleChange} required className={inputClass} placeholder="Hall ObjectId" />
+                    <select name="hallId" value={form.hallId} onChange={handleChange} required className={selectClass}>
+                        <option value="">Select hall</option>
+                        {filteredHalls.map((h) => (
+                            <option key={h._id} value={h._id}>{h.name}</option>
+                        ))}
+                    </select>
                 </Field>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -118,6 +164,9 @@ function CreateShowtimeContent() {
 
 const inputClass =
     "w-full bg-[#111] border border-white/10 rounded-lg px-4 py-3 text-sm text-white placeholder-gray-600 outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400/20 transition";
+
+const selectClass =
+    "w-full bg-[#111] border border-white/10 rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400/20 transition";
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
     return (

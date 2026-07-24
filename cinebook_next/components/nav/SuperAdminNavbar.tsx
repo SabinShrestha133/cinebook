@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import { LogOut, ChevronDown, Shield, User } from "lucide-react";
+import { LogOut, ChevronDown, Shield, User, Film } from "lucide-react";
 
 export default function SuperAdminNavbar() {
     const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -62,6 +62,9 @@ export default function SuperAdminNavbar() {
                                 <div className="py-1">
                                     <Link href="/super-admin/dashboard" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-400 hover:text-white hover:bg-white/5 transition">
                                         <Shield className="w-4 h-4" /> Admin Panel
+                                    </Link>
+                                    <Link href="/admin/dashboard" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-400 hover:text-white hover:bg-white/5 transition">
+                                        <Film className="w-4 h-4" /> Admin Console
                                     </Link>
                                 </div>
 

@@ -4,10 +4,11 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Movie } from "@/lib/api/movie";
 import { Showtime, ShowtimeHall } from "@/lib/api/showtime";
+import { Cinema, fetchCinemas } from "@/lib/api/cinema";
 import { loadMovieDetail, loadShowtimesForMovie } from "@/lib/actions/detail-action";
 import { submitBooking } from "@/lib/actions/booking-action";
 import { getSeatsByHall, type Seat } from "@/lib/api/hall";
-import { Loader2, ArrowLeft } from "lucide-react";
+import { Loader2, ArrowLeft, MapPin } from "lucide-react";
 
 interface SeatView {
     seatId: string;
@@ -20,6 +21,19 @@ interface SeatView {
     booked: boolean;
 }
 
+const SEAT_COLORS: Record<string, string> = {
+    regular: "bg-gray-400 border-gray-500 text-gray-900",
+    premium: "bg-amber-400 border-amber-500 text-amber-900",
+    vip: "bg-indigo-400 border-indigo-500 text-indigo-900",
+};
+
+const SEAT_STATUS_COLORS: Record<string, string> = {
+    active: "",
+    disabled: "bg-gray-600 border-gray-700 text-gray-300 opacity-60 cursor-not-allowed",
+    hidden: "invisible",
+    missing: "bg-transparent border-transparent",
+};
+
 export default function MovieDetailPage() {
     const params = useParams();
     const router = useRouter();
@@ -27,6 +41,8 @@ export default function MovieDetailPage() {
 
     const [movie, setMovie] = useState<Movie | null>(null);
     const [showtimes, setShowtimes] = useState<Showtime[]>([]);
+    const [cinemas, setCinemas] = useState<Cinema[]>([]);
+    const [selectedCinemaId, setSelectedCinemaId] = useState<string | null>(null);
     const [selectedShowtimeId, setSelectedShowtimeId] = useState<string | null>(null);
     const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
     const [seats, setSeats] = useState<Seat[]>([]);
@@ -34,6 +50,22 @@ export default function MovieDetailPage() {
     const [bookingMessage, setBookingMessage] = useState<string | null>(null);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    const cinemasWithShowtimes = useMemo(() => {
+        const byCinema = new Map<string, Showtime[]>();
+        for (const st of showtimes) {
+            if (!byCinema.has(st.cinemaId)) byCinema.set(st.cinemaId, []);
+            byCinema.get(st.cinemaId)!.push(st);
+        }
+        return cinemas
+            .filter((cinema) => byCinema.has(cinema._id))
+            .map((cinema) => ({ cinema, showtimes: byCinema.get(cinema._id)! }));
+    }, [showtimes, cinemas]);
+
+    const showtimesForCinema = useMemo(() => {
+        if (!selectedCinemaId) return [];
+        return showtimes.filter((st) => st.cinemaId === selectedCinemaId);
+    }, [showtimes, selectedCinemaId]);
 
     const selectedShowtime = useMemo(() => {
         return showtimes.find((item) => item._id === selectedShowtimeId) ?? null;
@@ -46,16 +78,22 @@ export default function MovieDetailPage() {
             setLoading(true);
             setError(null);
             try {
-                const [movieDetail, movieShowtimes] = await Promise.all([
+                const [movieDetail, movieShowtimes, cinemaList] = await Promise.all([
                     loadMovieDetail(movieId),
                     loadShowtimesForMovie(movieId),
+                    fetchCinemas(),
                 ]);
 
                 setMovie(movieDetail);
                 setShowtimes(movieShowtimes);
+                setCinemas(cinemaList);
 
                 if (movieShowtimes.length > 0) {
-                    setSelectedShowtimeId(movieShowtimes[0]._id);
+                    const firstCinemaId = cinemaList.find((c) => movieShowtimes.some((st) => st.cinemaId === c._id))?._id
+                        ?? movieShowtimes[0].cinemaId;
+                    setSelectedCinemaId(firstCinemaId);
+                    const firstShowtime = movieShowtimes.find((st) => st.cinemaId === firstCinemaId) ?? movieShowtimes[0];
+                    setSelectedShowtimeId(firstShowtime._id);
                 }
             } catch (err: unknown) {
                 setError(err instanceof Error ? err.message : "Unable to load movie details");
@@ -107,6 +145,19 @@ export default function MovieDetailPage() {
                 booked: booked.has(seat._id),
             }));
     }, [seats, selectedShowtime]);
+
+    const seatRows = useMemo(() => {
+        if (seatLayout.length === 0) return [];
+        const map = new Map<string, SeatView[]>();
+        seatLayout.forEach((seat) => {
+            const arr = map.get(seat.rowLabel) || [];
+            arr.push(seat);
+            map.set(seat.rowLabel, arr);
+        });
+        return Array.from(map.entries())
+            .map(([label, seatList]) => ({ label, seats: seatList.sort((a, b) => a.seatNumber - b.seatNumber) }))
+            .sort((a, b) => a.label.localeCompare(b.label));
+    }, [seatLayout]);
 
     const totalAmount = useMemo(() => {
         if (!selectedShowtime || selectedSeats.length === 0) return 0;
@@ -233,16 +284,55 @@ export default function MovieDetailPage() {
                     <div className="rounded-[2rem] border border-white/10 bg-[#111] p-6 sm:p-8">
                         <div className="flex items-center justify-between gap-4">
                             <div>
+                                <h2 className="text-xl font-semibold">Select a cinema</h2>
+                                <p className="text-gray-500 text-sm">Choose a location to see its showtimes.</p>
+                            </div>
+                        </div>
+
+                        <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                            {cinemasWithShowtimes.length === 0 ? (
+                                <p className="text-gray-400">No showtimes published for this movie yet.</p>
+                            ) : (
+                                cinemasWithShowtimes.map(({ cinema }) => (
+                                    <button
+                                        key={cinema._id}
+                                        onClick={() => {
+                                            setSelectedCinemaId(cinema._id);
+                                            setSelectedShowtimeId(null);
+                                            setSelectedSeats([]);
+                                        }}
+                                        className={`w-full rounded-3xl border px-4 py-4 text-left transition ${selectedCinemaId === cinema._id ? "border-yellow-400 bg-yellow-400/5" : "border-white/10 bg-white/5 hover:border-white/30"}`}
+                                    >
+                                        <div className="flex items-start gap-3">
+                                            <MapPin className={`mt-0.5 h-4 w-4 shrink-0 ${selectedCinemaId === cinema._id ? "text-yellow-300" : "text-gray-400"}`} />
+                                            <div>
+                                                <p className="text-base font-semibold text-white">{cinema.name}</p>
+                                                <p className="mt-1 text-sm text-gray-400">{[cinema.city, cinema.address].filter(Boolean).join(" · ") || "No location info"}</p>
+                                            </div>
+                                        </div>
+                                    </button>
+                                ))
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="rounded-[2rem] border border-white/10 bg-[#111] p-6 sm:p-8">
+                        <div className="flex items-center justify-between gap-4">
+                            <div>
                                 <h2 className="text-xl font-semibold">Available showtimes</h2>
-                                <p className="text-gray-500 text-sm">Pick a session and choose your seats.</p>
+                                <p className="text-gray-500 text-sm">
+                                    {selectedCinemaId ? "Pick a session and choose your seats." : "Select a cinema above to see showtimes."}
+                                </p>
                             </div>
                         </div>
 
                         <div className="mt-6 grid gap-3">
-                            {showtimes.length === 0 ? (
-                                <p className="text-gray-400">No showtimes published for this movie yet.</p>
+                            {!selectedCinemaId ? (
+                                <p className="text-gray-400">Choose a cinema to view available showtimes.</p>
+                            ) : showtimesForCinema.length === 0 ? (
+                                <p className="text-gray-400">No showtimes published for this cinema yet.</p>
                             ) : (
-                                showtimes.map((item) => (
+                                showtimesForCinema.map((item) => (
                                     <button
                                         key={item._id}
                                         onClick={() => {
@@ -274,29 +364,61 @@ export default function MovieDetailPage() {
                         </div>
 
                         <div className="mt-6">
-                            {seatLayout.length === 0 ? (
+                            {seatRows.length === 0 ? (
                                 <p className="text-gray-400">Seat layout is not available for the selected showtime.</p>
                             ) : (
-                                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                                    {seatLayout.map((seat) => (
-                                        <button
-                                            key={seat.seatId}
-                                            type="button"
-                                            disabled={!seat.available}
-                                            onClick={() => handleSelectSeat(seat.seatId, seat.available)}
-                                            className={`rounded-3xl border px-4 py-3 text-left text-sm transition ${seat.available ? (seat.booked ? "border-rose-500 bg-rose-500/10 text-rose-300" : "border-white/10 bg-white/5 hover:border-yellow-400") : "border-rose-500 bg-rose-500/10 text-rose-300 cursor-not-allowed"} ${selectedSeats.includes(seat.seatId) && !seat.booked ? "border-yellow-400 bg-yellow-400/10" : ""}`}
-                                        >
-                                            <div className="flex items-center justify-between gap-3">
-                                                <div>
-                                                    <p className="font-semibold text-white">{seat.label}</p>
-                                                    <p className="text-xs text-gray-400">{seat.seatId} · {seat.seatType}</p>
+                                <div className="overflow-x-auto">
+                                    <div className="min-w-max inline-block">
+                                        {seatRows.map((row) => (
+                                            <div key={row.label} className="flex items-center gap-2 mb-2">
+                                                <span className="w-8 text-white font-bold text-sm">{row.label}</span>
+                                                <div className="flex items-center gap-1.5">
+                                                    {row.seats.map((seat) => {
+                                                        if (seat.status === "missing") {
+                                                            return <div key={seat.seatId} className="w-8 h-8" />;
+                                                        }
+                                                        if (seat.status === "hidden") {
+                                                            return <div key={seat.seatId} className="w-8 h-8 border border-transparent" title={`${seat.label} (Hidden)`} />;
+                                                        }
+
+                                                        const baseColor = SEAT_COLORS[seat.seatType] || SEAT_COLORS.regular;
+                                                        const statusColor = SEAT_STATUS_COLORS[seat.status] || "";
+                                                        const isSelected = selectedSeats.includes(seat.seatId);
+                                                        const isBooked = seat.booked;
+
+                                                        return (
+                                                            <button
+                                                                key={seat.seatId}
+                                                                type="button"
+                                                                disabled={!seat.available}
+                                                                onClick={() => handleSelectSeat(seat.seatId, seat.available)}
+                                                                title={`${seat.label} - ${seat.seatType}${isBooked ? " (Booked)" : seat.available ? " (Available)" : ""}`}
+                                                                className={`w-8 h-8 rounded-lg border-2 flex items-center justify-center text-[10px] font-bold transition ${baseColor} ${statusColor} ${isSelected ? "ring-2 ring-yellow-400" : "border"} ${isBooked ? "bg-rose-500/70 border-rose-500 text-rose-100" : seat.available ? "cursor-pointer hover:scale-110 hover:border-white" : "cursor-not-allowed"}`}
+                                                            >
+                                                                {seat.seatNumber}
+                                                            </button>
+                                                        );
+                                                    })}
                                                 </div>
-                                                <span className="rounded-full bg-white/10 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-gray-300">
-                                                    {seat.booked ? "Booked" : seat.available ? "Available" : "Unavailable"}
-                                                </span>
                                             </div>
-                                        </button>
-                                    ))}
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {seatRows.length > 0 && (
+                                <div className="mt-8">
+                                    <div className="flex items-center gap-4 justify-end">
+                                        <div className="rounded-full bg-white/5 px-3 py-2 text-xs text-gray-400">Screen</div>
+                                        <div className="flex-1 h-2 bg-gradient-to-r from-white/10 via-white/5 to-white/10 rounded-full max-w-md mx-auto" />
+                                    </div>
+                                    <div className="mt-6 flex flex-wrap items-center gap-4 text-xs text-gray-400">
+                                        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-gray-400 border border-gray-500 inline-block" /> Regular</span>
+                                        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-amber-400 border border-amber-500 inline-block" /> Premium</span>
+                                        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-indigo-400 border border-indigo-500 inline-block" /> VIP</span>
+                                        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-rose-500/70 border border-rose-500 inline-block" /> Booked</span>
+                                        <span className="flex items-center gap-1"><span className="w-3 h-3 rounded ring-2 ring-yellow-400 border border-white inline-block" /> Selected</span>
+                                    </div>
                                 </div>
                             )}
                         </div>

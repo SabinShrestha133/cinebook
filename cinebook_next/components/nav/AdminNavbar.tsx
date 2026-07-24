@@ -4,13 +4,15 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import { LogOut, ChevronDown, Film, User, Shield, PlusCircle, CalendarDays, LayoutGrid } from "lucide-react";
+import { can, PERMISSIONS } from "@/lib/utils/permissions";
+import { LogOut, ChevronDown, Film, User, Shield, PlusCircle, CalendarDays, LayoutGrid, Building2, Ticket } from "lucide-react";
 
 export default function AdminNavbar() {
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
     const { user, logout } = useAuth();
+    const canFn = (permission: string) => can(user?.role, user?.permissions, permission as never);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -63,18 +65,36 @@ export default function AdminNavbar() {
                                     <Link href="/admin/dashboard" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-400 hover:text-white hover:bg-white/5 transition">
                                         <Film className="w-4 h-4" /> Analytics
                                     </Link>
-                                    <Link href="/admin/users" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-400 hover:text-white hover:bg-white/5 transition">
-                                        <Shield className="w-4 h-4" /> Users
-                                    </Link>
-                                    <Link href="/admin/movies/new" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-400 hover:text-white hover:bg-white/5 transition">
-                                        <PlusCircle className="w-4 h-4" /> New Movie
-                                    </Link>
-                                    <Link href="/admin/showtimes/new" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-400 hover:text-white hover:bg-white/5 transition">
-                                        <CalendarDays className="w-4 h-4" /> New Showtime
-                                    </Link>
-                                    <Link href="/admin/halls/new" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-400 hover:text-white hover:bg-white/5 transition">
-                                        <LayoutGrid className="w-4 h-4" /> New Hall
-                                    </Link>
+                                    {canFn(PERMISSIONS.USER_MANAGE) && (
+                                        <Link href="/admin/users" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-400 hover:text-white hover:bg-white/5 transition">
+                                            <Shield className="w-4 h-4" /> Users
+                                        </Link>
+                                    )}
+                                    {canFn(PERMISSIONS.BOOKING_VIEW) && (
+                                        <Link href="/admin/bookings" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-400 hover:text-white hover:bg-white/5 transition">
+                                            <Ticket className="w-4 h-4" /> Bookings
+                                        </Link>
+                                    )}
+                                    {canFn(PERMISSIONS.MOVIE_CREATE) && (
+                                        <Link href="/admin/movies/new" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-400 hover:text-white hover:bg-white/5 transition">
+                                            <PlusCircle className="w-4 h-4" /> New Movie
+                                        </Link>
+                                    )}
+                                    {canFn(PERMISSIONS.SHOWTIME_CREATE) && (
+                                        <Link href="/admin/showtimes/new" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-400 hover:text-white hover:bg-white/5 transition">
+                                            <CalendarDays className="w-4 h-4" /> New Showtime
+                                        </Link>
+                                    )}
+                                    {canFn(PERMISSIONS.HALL_MANAGE) && (
+                                        <Link href="/admin/halls/new" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-400 hover:text-white hover:bg-white/5 transition">
+                                            <LayoutGrid className="w-4 h-4" /> New Hall
+                                        </Link>
+                                    )}
+                                    {canFn(PERMISSIONS.CINEMA_MANAGE) && (
+                                        <Link href="/admin/cinemas/new" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-400 hover:text-white hover:bg-white/5 transition">
+                                            <Building2 className="w-4 h-4" /> New Cinema
+                                        </Link>
+                                    )}
                                 </div>
 
                                 <div className="border-t border-white/5 mt-1 pt-1">

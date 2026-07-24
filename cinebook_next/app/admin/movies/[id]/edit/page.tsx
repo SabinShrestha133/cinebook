@@ -1,13 +1,17 @@
 "use client";
 
-import { useState, type ChangeEvent } from "react";
-import { useRouter } from "next/navigation";
-import { handleCreateMovie } from "@/lib/actions/admin-action";
-import { Loader2, Film, CheckCircle2 } from "lucide-react";
+import { useEffect, useState, type ChangeEvent } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { fetchMovieById, type Movie } from "@/lib/api/movie";
+import { handleUpdateMovie } from "@/lib/actions/admin-action";
+import { Loader2, Film, ArrowLeft } from "lucide-react";
 import GenreModal from "@/components/GenreModal";
 
-function CreateMovieContent() {
+function EditMovieContent() {
+    const params = useParams();
     const router = useRouter();
+    const movieId = params?.id as string;
+
     const [form, setForm] = useState({
         title: "",
         slug: "",
@@ -17,12 +21,44 @@ function CreateMovieContent() {
         duration: "",
         releaseDate: "",
         featured: false,
+        status: "upcoming" as Movie["status"],
     });
-    const [poster, setPoster] = useState<File | null>(null);
-    const [posterName, setPosterName] = useState("");
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+    const [error, setError] = useState("");
     const [genreModalOpen, setGenreModalOpen] = useState(false);
+
+    useEffect(() => {
+        if (!movieId) return;
+
+        const load = async () => {
+            try {
+                const movie = await fetchMovieById(movieId);
+                if (!movie) {
+                    setError("Movie not found");
+                    return;
+                }
+                 setForm({
+                    title: movie.title || "",
+                    slug: movie.slug || "",
+                    description: movie.description || "",
+                    genres: movie.genres || [],
+                    language: movie.language || "",
+                    duration: movie.duration ? String(movie.duration) : "",
+                    releaseDate: movie.releaseDate || "",
+                    featured: movie.featured || false,
+                    status: movie.status || "upcoming",
+                });
+            } catch (err: unknown) {
+                setError(err instanceof Error ? err.message : "Unable to load movie");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        load();
+    }, [movieId]);
 
     const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
@@ -38,40 +74,57 @@ function CreateMovieContent() {
         setForm((prev) => ({ ...prev, genres }));
     };
 
-    const handleFile = (e: ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0] ?? null;
-        setPoster(file);
-        setPosterName(file?.name ?? "");
-    };
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setLoading(true);
+        setSaving(true);
         setMessage(null);
 
-        const fd = new FormData();
-        fd.append("title", form.title);
-        if (form.slug) fd.append("slug", form.slug);
-        if (form.description) fd.append("description", form.description);
-        if (form.genres.length > 0) {
-            form.genres.forEach((g) => fd.append("genres", g));
-        }
-        if (form.language) fd.append("language", form.language);
-        if (form.duration) fd.append("duration", form.duration);
-        if (form.releaseDate) fd.append("releaseDate", form.releaseDate);
-        fd.append("featured", String(form.featured));
-        if (poster) fd.append("poster", poster);
+        const payload: Partial<Movie> = {
+            title: form.title,
+            slug: form.slug,
+            description: form.description,
+            genres: form.genres,
+            language: form.language,
+            duration: form.duration ? Number(form.duration) : undefined,
+            releaseDate: form.releaseDate,
+            featured: form.featured,
+            status: form.status,
+        };
 
-        const res = await handleCreateMovie(fd);
-        setLoading(false);
+        const res = await handleUpdateMovie(movieId, payload);
+        setSaving(false);
 
         if (res.success) {
-            setMessage({ type: "success", text: "Movie created successfully" });
+            setMessage({ type: "success", text: "Movie updated successfully" });
             setTimeout(() => router.push("/admin/dashboard"), 800);
         } else {
-            setMessage({ type: "error", text: res.message || "Failed to create movie" });
+            setMessage({ type: "error", text: res.message || "Failed to update movie" });
         }
     };
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center py-20">
+                <Loader2 className="w-8 h-8 animate-spin text-yellow-400" />
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="max-w-2xl mx-auto space-y-6">
+                <div className="p-4 bg-red-500/10 border border-red-500/50 rounded-2xl text-red-400 text-sm">
+                    {error}
+                </div>
+                <button
+                    onClick={() => router.back()}
+                    className="flex items-center gap-2 text-gray-400 hover:text-white transition text-sm"
+                >
+                    <ArrowLeft className="w-4 h-4" /> Go back
+                </button>
+            </div>
+        );
+    }
 
     return (
         <div className="max-w-2xl mx-auto space-y-6">
@@ -80,8 +133,8 @@ function CreateMovieContent() {
                     <Film className="w-5 h-5 text-yellow-400" />
                 </div>
                 <div>
-                    <h1 className="text-white text-2xl font-bold tracking-wide">Add New Movie</h1>
-                    <p className="text-gray-500 text-sm">Create a movie entry with poster</p>
+                    <h1 className="text-white text-2xl font-bold tracking-wide">Edit Movie</h1>
+                    <p className="text-gray-500 text-sm">Update movie information</p>
                 </div>
             </div>
 
@@ -118,7 +171,7 @@ function CreateMovieContent() {
                 </Field>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Field label="Genres">
+                    <Field label="Genres">
                     <button
                         type="button"
                         onClick={() => setGenreModalOpen(true)}
@@ -140,19 +193,18 @@ function CreateMovieContent() {
                     </Field>
                 </div>
 
-                <Field label="Release Date">
-                    <input name="releaseDate" type="date" value={form.releaseDate} onChange={handleChange} className={inputClass} />
-                </Field>
-
-                <Field label="Poster Image">
-                    <input type="file" accept="image/*" onChange={handleFile}
-                        className="w-full bg-[#111] border border-white/10 rounded-lg px-4 py-3 text-sm text-white file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:bg-yellow-400 file:text-black file:text-xs file:font-bold" />
-                    {posterName && (
-                        <p className="text-gray-500 text-xs mt-1 flex items-center gap-1">
-                            <CheckCircle2 className="w-3 h-3 text-green-400" /> {posterName}
-                        </p>
-                    )}
-                </Field>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <Field label="Release Date">
+                        <input name="releaseDate" type="date" value={form.releaseDate} onChange={handleChange} className={inputClass} />
+                    </Field>
+                    <Field label="Status">
+                        <select name="status" value={form.status} onChange={handleChange} className={inputClass}>
+                            <option value="now_showing">Now Showing</option>
+                            <option value="upcoming">Upcoming</option>
+                            <option value="archived">Archived</option>
+                        </select>
+                    </Field>
+                </div>
 
                 <label className="flex items-center gap-2 text-gray-300 text-sm cursor-pointer">
                     <input type="checkbox" name="featured" checked={form.featured} onChange={handleChange}
@@ -160,13 +212,22 @@ function CreateMovieContent() {
                     Featured movie
                 </label>
 
-                <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full bg-yellow-400 hover:bg-yellow-300 disabled:bg-yellow-400/50 text-black text-sm font-bold py-3 rounded-lg tracking-widest uppercase transition"
-                >
-                    {loading ? <span className="flex items-center justify-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Creating…</span> : "Create Movie"}
-                </button>
+                <div className="flex gap-3">
+                    <button
+                        type="button"
+                        onClick={() => router.back()}
+                        className="flex-1 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-sm font-bold py-3 rounded-lg tracking-widest uppercase transition"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="submit"
+                        disabled={saving}
+                        className="flex-1 bg-yellow-400 hover:bg-yellow-300 disabled:bg-yellow-400/50 text-black text-sm font-bold py-3 rounded-lg tracking-widest uppercase transition"
+                    >
+                        {saving ? <span className="flex items-center justify-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Saving…</span> : "Save Changes"}
+                    </button>
+                </div>
             </form>
             <GenreModal
                 isOpen={genreModalOpen}
@@ -190,6 +251,6 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     );
 }
 
-export default function CreateMoviePage() {
-    return <CreateMovieContent />;
+export default function EditMoviePage() {
+    return <EditMovieContent />;
 }

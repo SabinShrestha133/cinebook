@@ -68,6 +68,30 @@ export interface UserDetails {
     bookings: UserBooking[];
 }
 
+export interface AdminBooking {
+    _id: string;
+    user: {
+        _id: string;
+        name: string;
+        email: string;
+    };
+    movieTitle: string;
+    movieSlug: string;
+    cinemaName: string;
+    showtime: {
+        showDate?: string;
+        startTime: string;
+        endTime: string;
+    };
+    seats: Array<{ seatId: string; label?: string; price: number }>;
+    seatCount: number;
+    totalAmount: number;
+    bookingStatus: string;
+    paymentStatus: string;
+    bookingCode: string;
+    createdAt: string;
+}
+
 export const getDashboardSummary = async (): Promise<DashboardSummary> => {
     try {
         const response = await protectedAxios.get(API.ADMIN.DASHBOARD);
@@ -145,6 +169,21 @@ export const deleteUser = async (id: string) => {
             throw new Error(error.message || "Failed to delete user");
         }
         throw new Error("Failed to delete user");
+    }
+};
+
+export const listAllBookings = async (params?: { cinemaId?: string; movieId?: string; userId?: string }): Promise<AdminBooking[]> => {
+    try {
+        const response = await protectedAxios.get(API.ADMIN.BOOKINGS, { params });
+        return response.data?.data ?? [];
+    } catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+            throw new Error(error.response?.data?.message || "Failed to load bookings");
+        }
+        if (error instanceof Error) {
+            throw new Error(error.message || "Failed to load bookings");
+        }
+        throw new Error("Failed to load bookings");
     }
 };
 
