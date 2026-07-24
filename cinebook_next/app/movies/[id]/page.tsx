@@ -55,6 +55,7 @@ export default function MovieDetailPage() {
     const [seatRecs, setSeatRecs] = useState<SeatRecommendation[]>([]);
     const [seatRecLoading, setSeatRecLoading] = useState(false);
     const [seatRecError, setSeatRecError] = useState("");
+    const [seatRecCount, setSeatRecCount] = useState(2);
     const { user } = useAuth();
 
     const cinemasWithShowtimes = useMemo(() => {
@@ -185,7 +186,7 @@ export default function MovieDetailPage() {
         setSeatRecLoading(true);
         setSeatRecError("");
         try {
-            const result = await fetchSeatRecommendations(selectedShowtime._id, 2);
+            const result = await fetchSeatRecommendations(selectedShowtime._id, seatRecCount);
             if (result.success && result.data && result.data.length > 0) {
                 const best = result.data[0];
                 setSeatRecs(result.data);
@@ -337,6 +338,7 @@ export default function MovieDetailPage() {
                                             setSelectedCinemaId(cinema._id);
                                             setSelectedShowtimeId(null);
                                             setSelectedSeats([]);
+                                            setSeatRecs([]);
                                         }}
                                         className={`w-full rounded-3xl border px-4 py-4 text-left transition ${selectedCinemaId === cinema._id ? "border-yellow-400 bg-yellow-400/5" : "border-white/10 bg-white/5 hover:border-white/30"}`}
                                     >
@@ -375,6 +377,7 @@ export default function MovieDetailPage() {
                                         onClick={() => {
                                             setSelectedShowtimeId(item._id);
                                             setSelectedSeats([]);
+                                            setSeatRecs([]);
                                         }}
                                         className={`w-full rounded-3xl border px-4 py-4 text-left transition ${selectedShowtimeId === item._id ? "border-yellow-400 bg-yellow-400/5" : "border-white/10 bg-white/5 hover:border-white/30"}`}
                                     >
@@ -421,7 +424,24 @@ export default function MovieDetailPage() {
                             <p className="mt-2 text-sm text-rose-300">{seatRecError}</p>
                         )}
 
-                        <div className="mt-4 flex justify-end">
+                        <div className="mt-4 flex flex-wrap items-center gap-3 justify-end">
+                            <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2">
+                                <span className="text-xs text-gray-400">Seats:</span>
+                                {[1,2,3,4,5,6,7,8].map((n) => (
+                                    <button
+                                        key={n}
+                                        type="button"
+                                        onClick={() => setSeatRecCount(n)}
+                                        className={`h-8 w-8 rounded-full text-xs font-semibold transition ${
+                                            seatRecCount === n
+                                                ? "bg-yellow-400 text-black"
+                                                : "text-gray-400 hover:text-white"
+                                        }`}
+                                    >
+                                        {n}
+                                    </button>
+                                ))}
+                            </div>
                             <button
                                 type="button"
                                 onClick={handleSmartPick}

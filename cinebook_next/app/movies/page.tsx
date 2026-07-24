@@ -83,12 +83,22 @@ export default function MoviesPage() {
                         <h1 className="text-4xl font-bold text-white">Browse Movies</h1>
                         <p className="mt-2 text-gray-500 max-w-2xl">Discover current and upcoming movies available for booking through the CineBook API.</p>
                     </div>
-                    <Link
-                        href="/register"
-                        className="inline-flex items-center justify-center rounded-3xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:border-yellow-300"
-                    >
-                        Create an account
-                    </Link>
+                    {!user && (
+                        <Link
+                            href="/register"
+                            className="inline-flex items-center justify-center rounded-3xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:border-yellow-300"
+                        >
+                            Create an account
+                        </Link>
+                    )}
+                    {user && (
+                        <Link
+                            href="/user/dashboard"
+                            className="inline-flex items-center justify-center rounded-3xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:border-yellow-300"
+                        >
+                            My Dashboard
+                        </Link>
+                    )}
                 </div>
 
                 {user && !aiLoading && aiRecommendations.length > 0 && (
