@@ -2,9 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { fetchMovies } from "@/lib/actions/movie-action";
+import { fetchAiMovieRecommendations, type AiMovieRecommendation } from "@/lib/api/ai-recommendation";
 import { Movie } from "@/lib/api/movie";
 import MovieCard from "@/app/frontend/_components/MovieCard";
 import Link from "next/link";
+import { Loader2, Sparkles } from "lucide-react";
+import { useAuth } from "@/lib/contexts/AuthContext";
 
 type Tab = "now_showing" | "upcoming";
 
@@ -13,6 +16,10 @@ export default function MoviesPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [activeTab, setActiveTab] = useState<Tab>("now_showing");
+    const [aiRecommendations, setAiRecommendations] = useState<AiMovieRecommendation[]>([]);
+    const [aiLoading, setAiLoading] = useState(false);
+    const [aiError, setAiError] = useState("");
+    const { user } = useAuth();
 
     useEffect(() => {
         const loadMovies = async () => {
@@ -32,6 +39,32 @@ export default function MoviesPage() {
 
         loadMovies();
     }, []);
+
+    useEffect(() => {
+        const loadAiRecs = async () => {
+            if (!user) return;
+            setAiLoading(true);
+            setAiError("");
+            try {
+                const result = await fetchAiMovieRecommendations();
+                if (result.success && result.recommendations) {
+                    setAiRecommendations(result.recommendations);
+                } else {
+                    setAiError(result.message || "Failed to load recommendations");
+                }
+            } catch (err: unknown) {
+                if (err instanceof Error) {
+                    setAiError(err.message);
+                } else {
+                    setAiError("Unable to load AI recommendations");
+                }
+            } finally {
+                setAiLoading(false);
+            }
+        };
+
+        loadAiRecs();
+    }, [user]);
 
     const displayedMovies = useMemo(() => {
         const base = movies.filter((m) => m.status !== "archived");
@@ -57,6 +90,42 @@ export default function MoviesPage() {
                         Create an account
                     </Link>
                 </div>
+
+                {user && !aiLoading && aiRecommendations.length > 0 && (
+                    <div className="mb-10">
+                        <div className="flex items-center gap-2 mb-4">
+                            <Sparkles className="h-5 w-5 text-yellow-400" />
+                            <h2 className="text-2xl font-semibold text-white">Recommended for You</h2>
+                        </div>
+                        <p className="text-sm text-gray-400 mb-4">Based on your watch history and preferences.</p>
+                        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                            {aiRecommendations.map((rec) => (
+                                <div key={rec.movieId} className="rounded-[2rem] border border-white/10 bg-[#111] p-5 shadow-black/20 shadow-sm">
+                                    <div className="flex items-start justify-between gap-3 mb-3">
+                                        <h3 className="text-lg font-semibold text-white">{rec.title}</h3>
+                                        <span className="shrink-0 rounded-full bg-yellow-400/10 px-3 py-1 text-xs font-semibold text-yellow-300">
+                                            {rec.matchScore}% match
+                                        </span>
+                                    </div>
+                                    <p className="text-sm text-gray-400 leading-relaxed">{rec.reason}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {user && aiLoading && (
+                    <div className="mb-10 rounded-[2rem] border border-white/10 bg-[#111] p-10 text-center text-gray-400">
+                        <Loader2 className="mx-auto h-8 w-8 animate-spin text-yellow-400" />
+                        <p className="mt-4">Finding your perfect matches…</p>
+                    </div>
+                )}
+
+                {user && aiError && (
+                    <div className="mb-10 rounded-[2rem] border border-rose-500/20 bg-[#111] p-6 text-center text-rose-300">
+                        {aiError}
+                    </div>
+                )}
 
                 <div className="mb-8">
                     <div className="inline-flex rounded-full border border-white/10 bg-white/5 p-1">
