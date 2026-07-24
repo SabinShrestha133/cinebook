@@ -25,18 +25,17 @@ import seatRoutes from "./routes/seat.route";
 import cinemaRoutes from "./routes/cinema.route";
 
 import { PORT, HOST } from "./configs/constant";
+import { bookingService } from "./services/booking.service";
 
 const app: Application = express();
 
-
-// ===============================
-// CORS CONFIG
-// ===============================
 
 const allowedOrigins = [
     "http://localhost:3000",
     "http://localhost:3001",
     "http://localhost:5000",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:5000",
     "http://10.0.2.2:5000",
     "http://localhost:8089",
     "exp://localhost"
@@ -51,7 +50,6 @@ const corsOptions = {
     ) => {
 
 
-        // Allow server-to-server / Postman
         if (!origin) {
             return callback(null, true);
         }
@@ -92,10 +90,6 @@ app.use(cors(corsOptions));
 
 
 
-// ===============================
-// BODY PARSER
-// ===============================
-
 app.use(express.json());
 
 app.use(
@@ -106,20 +100,10 @@ app.use(
 
 
 
-// ===============================
-// LOGGER
-// ===============================
-
 app.use(
     morgan("combined")
 );
 
-
-
-// ===============================
-// STATIC FILES
-// PROFILE IMAGES
-// ===============================
 
 
 app.use(
@@ -131,17 +115,6 @@ app.use(
 
 
 
-// ===============================
-// API ROUTES
-// ===============================
-
-
-// Auth
-// /api/v1/auth/register
-// /api/v1/auth/login
-// /api/v1/auth/whoami
-// /api/v1/auth/update
-
 app.use(
     "/api/v1/auth",
     userRoutes
@@ -149,74 +122,57 @@ app.use(
 
 
 
-// Profile related routes
 app.use(
     "/api/v1/profile",
     profileRoutes
 );
 
-
-// Movies
 app.use(
     "/api/v1/movies",
     movieRoutes
 );
 
-// Showtimes
 app.use(
     "/api/v1/showtimes",
     showtimeRoutes
 );
 
-// Bookings
 app.use(
     "/api/v1/bookings",
     bookingRoutes
 );
 
-// Cinemas
 app.use(
     "/api/v1/cinemas",
     cinemaRoutes
 );
 
-// Admin
 app.use(
     "/api/v1/admin",
     adminRoutes
 );
 
-// Halls
 app.use(
     "/api/v1/halls",
     hallRoutes
 );
 
-// Seats
 app.use(
     "/api/v1/seats",
     seatRoutes
 );
 
-// Recommendations
 app.use(
     "/api/v1/recommendations",
     recommendationRoutes
 );
 
-// Super admin
 app.use(
     "/api/v1/super-admin",
     superAdminRoutes
 );
 
 
-
-
-
-// ===============================
-// NOT FOUND HANDLER
-// ===============================
 
 
 app.use(
@@ -239,11 +195,6 @@ app.use(
 
 
 
-
-
-// ===============================
-// GLOBAL ERROR HANDLER
-// ===============================
 
 
 app.use(
@@ -270,7 +221,6 @@ app.use(
                 err.status
             );
 
-
         }
 
 
@@ -293,6 +243,14 @@ app.use(
 
 
 
+
+setInterval(async () => {
+    try {
+        await bookingService.releaseExpiredBookings();
+    } catch (err) {
+        console.error("Expired booking cleanup failed:", err);
+    }
+}, 60 * 1000);
 
 export default app;
 

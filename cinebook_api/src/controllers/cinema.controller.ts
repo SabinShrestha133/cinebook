@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { cinemaService } from "../services/cinema.service";
 import { ApiResponseHelper } from "../utils/apihelper.util";
+import { createCinemaSchema, updateCinemaSchema } from "../validators/cinema.validator";
 
 export class CinemaController {
     async list(req: Request, res: Response) {
@@ -9,6 +10,28 @@ export class CinemaController {
             return ApiResponseHelper.success(res, data, "Cinemas fetched");
         } catch (err: any) {
             return ApiResponseHelper.error(res, err.message || "Error fetching cinemas", 500);
+        }
+    }
+
+    async create(req: Request, res: Response) {
+        try {
+            const parsed = createCinemaSchema.parse(req.body);
+            const cinema = await cinemaService.createCinema(parsed);
+            return ApiResponseHelper.success(res, cinema, "Cinema created", 201);
+        } catch (err: any) {
+            return ApiResponseHelper.error(res, err.message || "Error creating cinema", 500);
+        }
+    }
+
+    async update(req: Request, res: Response) {
+        try {
+            const id = String(req.params.id);
+            const parsed = updateCinemaSchema.parse(req.body);
+            const cinema = await cinemaService.updateCinema(id, parsed);
+            if (!cinema) return ApiResponseHelper.error(res, "Not found", 404);
+            return ApiResponseHelper.success(res, cinema, "Cinema updated");
+        } catch (err: any) {
+            return ApiResponseHelper.error(res, err.message || "Error updating cinema", 500);
         }
     }
 }

@@ -23,6 +23,10 @@ const UserMongoSchema: Schema = new Schema<IUser>(
             enum: ["user", "admin", "super_admin"],
             default: "user",
         },
+        permissions: {
+            type: [String],
+            default: [],
+        },
         profilePicture: { type: String },
         isActive: { type: Boolean, default: true },
         isVerified: { type: Boolean, default: false },

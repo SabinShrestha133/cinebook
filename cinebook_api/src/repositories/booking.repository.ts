@@ -16,4 +16,8 @@ export class BookingRepository {
     async update(id: string, data: Partial<IBooking>) {
         return BookingModel.findByIdAndUpdate(id, data, { new: true }).lean();
     }
+
+    async delete(id: string) {
+        return BookingModel.findByIdAndDelete(id);
+    }
 }

@@ -9,6 +9,6 @@ const router = Router();
 router.patch("/:id/type", authenticate, adminMiddleware, validateBody(updateSeatTypeSchema), seatController.updateType.bind(seatController));
 router.patch("/:id/status", authenticate, adminMiddleware, validateBody(updateSeatStatusSchema), seatController.updateStatus.bind(seatController));
 router.post("/bulk-update", authenticate, adminMiddleware, validateBody(bulkUpdateSeatsSchema), seatController.bulkUpdate.bind(seatController));
-router.get("/hall/:hallId", authenticate, adminMiddleware, seatController.getByHall.bind(seatController));
+router.get("/hall/:hallId", seatController.getByHall.bind(seatController));
 
 export default router;

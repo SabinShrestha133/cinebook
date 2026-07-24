@@ -80,3 +80,30 @@ export const adminMiddleware = authorizeRoles("admin", "super_admin");
 
 /** Super admin only */
 export const superAdminMiddleware = authorizeRoles("super_admin");
+
+/** Guards a specific admin function by permission.
+ *  Super admins always pass; regular admins must hold the permission. */
+export const requirePermission =
+    (permission: string) =>
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            if (!req.user) {
+                throw new HttpException(401, "Unauthorized: no user info");
+            }
+            if (req.user.role === "super_admin") {
+                return next();
+            }
+            const permissions: string[] = (req.user as IUser).permissions ?? [];
+            if (!permissions.includes(permission)) {
+                throw new HttpException(403, "Forbidden: missing required permission");
+            }
+            return next();
+        } catch (err: unknown) {
+            const error = err as { message?: string; status?: number };
+            return ApiResponseHelper.error(
+                res,
+                error.message || "Internal Server Error",
+                error.status || 500
+            );
+        }
+    };
