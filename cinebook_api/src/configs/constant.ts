@@ -1,12 +1,11 @@
 import dotenv from "dotenv";
 dotenv.config(); // implement .env file
 
-// Add fallback value from env for stability
-export const PORT: number = Number(process.env.PORT) || 8089; // default port is 8089
-export const HOST: string = process.env.HOST || "localhost"; // bind to all interfaces for mobile access
+export const PORT: number = Number(process.env.PORT) || 8089;
+export const HOST: string = process.env.HOST || "localhost";
 export const DUMMY: string = process.env.DUMMY || "Dummy Export";    
 export const MONGODB_URL: string = 
-    process.env.MONGODB_URL || "mongodb://localhost:27017/class-36a-db"; // default MongoDB URL
+    process.env.MONGODB_URL || "mongodb://localhost:27017/class-36a-db";
 export const SECRET_KEY: string = 
     process.env.SECRET_KEY || "merosecretkey";
 
@@ -15,10 +14,15 @@ export const EMAIL_USER: string =
 export const EMAIL_PASS: string =
     process.env.EMAIL_PASS || "password123";
 export const CLIENT_URL: string =
-    process.env.CLIENT_URL || 'http://localhost:3001';
-// same as 
-// export {
-//     PORT,
-//     DUMMY,
-//     MONGODB_URL
-// }
+    process.env.CLIENT_URL || 'http://localhost:3000';
+
+export const KHALTI_SECRET_KEY: string =
+    process.env.KHALTI_SECRET_KEY || "26d864da638440a7a2170efdd5d09de7";
+export const KHALTI_INITIATE_URL: string =
+    process.env.KHALTI_INITIATE_URL || "https://dev.khalti.com/api/v2/epayment/initiate/";
+export const KHALTI_VERIFY_URL: string =
+    process.env.KHALTI_VERIFY_URL || "https://dev.khalti.com/api/v2/epayment/lookup/";
+export const BOOKING_EXPIRY_MINUTES: number =
+    Number(process.env.BOOKING_EXPIRY_MINUTES) || 10;
+export const GEMINI_API_KEY: string =
+    process.env.GEMINI_API_KEY || "";

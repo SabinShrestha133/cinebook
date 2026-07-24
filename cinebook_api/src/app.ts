@@ -23,6 +23,8 @@ import superAdminRoutes from "./routes/superadmin.route";
 import hallRoutes from "./routes/hall.route";
 import seatRoutes from "./routes/seat.route";
 import cinemaRoutes from "./routes/cinema.route";
+import aiRecommendationRoutes from "./routes/ai-recommendation.route";
+import seatRecommendationRoutes from "./routes/seat-recommendation.route";
 
 import { PORT, HOST } from "./configs/constant";
 
@@ -198,10 +200,22 @@ app.use(
     seatRoutes
 );
 
+// Seat recommendations
+app.use(
+    "/api/v1/seat-recommendations",
+    seatRecommendationRoutes
+);
+
 // Recommendations
 app.use(
     "/api/v1/recommendations",
     recommendationRoutes
+);
+
+// AI Recommendations
+app.use(
+    "/api/v1/ai/recommendations",
+    aiRecommendationRoutes
 );
 
 // Super admin
