@@ -58,36 +58,58 @@ function AdminMoviesContent() {
                     No movies available yet.
                 </div>
             ) : (
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {movies.map((movie) => (
-                        <div
-                            key={movie._id}
-                            className="bg-[#1a1a1a] border border-white/5 rounded-2xl p-5 flex flex-col gap-3"
-                        >
-                            <div className="flex items-start justify-between gap-3">
-                                <div>
-                                    <h3 className="text-white font-semibold">{movie.title}</h3>
-                                    <p className="text-gray-500 text-xs uppercase tracking-wide mt-1">
-                                        {movie.status?.replace("_", " ") ?? "Unknown"}
-                                    </p>
-                                </div>
-                                <Link
-                                    href={`/admin/movies/${movie._id}/edit`}
-                                    className="flex items-center gap-1 rounded-full bg-white/5 border border-white/10 px-3 py-1.5 text-xs text-yellow-300 hover:border-yellow-400 transition"
-                                >
-                                    <Pencil className="w-3 h-3" /> Edit
-                                </Link>
-                            </div>
-                            <p className="text-gray-400 text-sm line-clamp-2">
-                                {movie.description || "No description available."}
-                            </p>
-                            <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] uppercase tracking-[0.2em] text-gray-400">
-                                <span className="text-yellow-300">{movie.genres?.join(", ") ?? "Drama"}</span>
-                                {movie.language && <span>{movie.language}</span>}
-                                <span>{movie.duration ? `${Math.floor(movie.duration / 60)}h ${movie.duration % 60}m` : "—"}</span>
-                            </div>
-                        </div>
-                    ))}
+                <div className="bg-[#1a1a1a] border border-white/5 rounded-2xl overflow-hidden">
+                    <table className="w-full text-sm">
+                        <thead>
+                            <tr className="text-gray-500 text-xs uppercase tracking-wide border-b border-white/5">
+                                <th className="text-left font-medium px-6 py-4">Title</th>
+                                <th className="text-left font-medium px-6 py-4">Genre</th>
+                                <th className="text-left font-medium px-6 py-4">Language</th>
+                                <th className="text-left font-medium px-6 py-4">Duration</th>
+                                <th className="text-left font-medium px-6 py-4">Status</th>
+                                <th className="text-right font-medium px-6 py-4">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {movies.map((movie) => (
+                                <tr key={movie._id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition">
+                                    <td className="px-6 py-4">
+                                        <div>
+                                            <p className="text-white font-medium">{movie.title}</p>
+                                            <p className="text-gray-500 text-xs mt-0.5 line-clamp-1">{movie.description || ""}</p>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 text-gray-400">
+                                        <div className="flex flex-wrap gap-1">
+                                            {(movie.genres || []).slice(0, 2).map((g) => (
+                                                <span key={g} className="px-2 py-0.5 rounded-full bg-white/5 text-[11px] text-gray-300">{g}</span>
+                                            ))}
+                                            {(movie.genres || []).length > 2 && (
+                                                <span className="px-2 py-0.5 rounded-full bg-white/5 text-[11px] text-gray-500">+{movie.genres.length - 2}</span>
+                                            )}
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 text-gray-400">{movie.language || "—"}</td>
+                                    <td className="px-6 py-4 text-gray-400">
+                                        {movie.duration ? `${Math.floor(movie.duration / 60)}h ${movie.duration % 60}m` : "—"}
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${movie.status === "now_showing" ? "bg-emerald-500/10 text-emerald-400" : movie.status === "upcoming" ? "bg-amber-500/10 text-amber-400" : "bg-gray-500/10 text-gray-400"}`}>
+                                            {movie.status?.replace("_", " ") ?? "Unknown"}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4 text-right">
+                                        <Link
+                                            href={`/admin/movies/${movie._id}/edit`}
+                                            className="inline-flex items-center gap-1 rounded-full bg-white/5 border border-white/10 px-3 py-1.5 text-xs text-yellow-300 hover:border-yellow-400 transition"
+                                        >
+                                            <Pencil className="w-3 h-3" /> Edit
+                                        </Link>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
             )}
         </div>
