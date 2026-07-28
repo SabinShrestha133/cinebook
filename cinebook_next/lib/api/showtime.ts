@@ -26,6 +26,9 @@ export interface Showtime {
     startTime: string;
     endTime?: string;
     ticketPrice: number;
+    discountType?: "none" | "percentage" | "fixed";
+    discountValue?: number;
+    effectivePrice?: number;
     bookedSeats?: string[];
     status?: "active" | "cancelled" | "completed";
 }

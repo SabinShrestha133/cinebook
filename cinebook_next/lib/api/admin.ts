@@ -6,6 +6,7 @@ export interface DashboardSummary {
     totalBookings: number;
     totalMovies: number;
     totalCinemas: number;
+    totalShowtimes: number;
     revenue: number;
 }
 
@@ -90,6 +91,34 @@ export interface AdminBooking {
     paymentStatus: string;
     bookingCode: string;
     createdAt: string;
+    showtimeStartTime?: string;
+}
+
+export interface Showtime {
+    _id: string;
+    movieId: string;
+    cinemaId: string;
+    hallId: string;
+    showDate: string;
+    startTime: string;
+    endTime?: string;
+    ticketPrice: number;
+    discountType?: "none" | "percentage" | "fixed";
+    discountValue?: number;
+    status?: "active" | "cancelled" | "completed";
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+export interface Hall {
+    _id: string;
+    name: string;
+    cinemaId: string;
+    totalRows: number;
+    seatsPerRow: number;
+    aisles?: number[];
+    createdAt?: string;
+    updatedAt?: string;
 }
 
 export const getDashboardSummary = async (): Promise<DashboardSummary> => {
@@ -216,5 +245,134 @@ export const createShowtime = async (data: Record<string, unknown>) => {
             throw new Error(error.message || "Failed to create showtime");
         }
         throw new Error("Failed to create showtime");
+    }
+};
+
+export const listShowtimes = async (params?: { cinemaId?: string; movieId?: string; hallId?: string }): Promise<Showtime[]> => {
+    try {
+        const response = await protectedAxios.get(API.ADMIN.SHOWTIMES, { params });
+        return response.data?.data ?? [];
+    } catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+            throw new Error(error.response?.data?.message || "Failed to load showtimes");
+        }
+        if (error instanceof Error) {
+            throw new Error(error.message || "Failed to load showtimes");
+        }
+        throw new Error("Failed to load showtimes");
+    }
+};
+
+export const getShowtime = async (id: string): Promise<Showtime | null> => {
+    try {
+        const response = await protectedAxios.get(API.ADMIN.SHOWTIME_DETAIL(id));
+        return response.data?.data ?? null;
+    } catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+            throw new Error(error.response?.data?.message || "Failed to load showtime");
+        }
+        if (error instanceof Error) {
+            throw new Error(error.message || "Failed to load showtime");
+        }
+        throw new Error("Failed to load showtime");
+    }
+};
+
+export const updateShowtime = async (id: string, data: Partial<Showtime>) => {
+    try {
+        const response = await protectedAxios.put(API.ADMIN.SHOWTIME_DETAIL(id), data);
+        return response.data;
+    } catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+            throw new Error(error.response?.data?.message || "Failed to update showtime");
+        }
+        if (error instanceof Error) {
+            throw new Error(error.message || "Failed to update showtime");
+        }
+        throw new Error("Failed to update showtime");
+    }
+};
+
+export const deleteShowtime = async (id: string) => {
+    try {
+        const response = await protectedAxios.delete(API.ADMIN.SHOWTIME_DETAIL(id));
+        return response.data;
+    } catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+            throw new Error(error.response?.data?.message || "Failed to delete showtime");
+        }
+        if (error instanceof Error) {
+            throw new Error(error.message || "Failed to delete showtime");
+        }
+        throw new Error("Failed to delete showtime");
+    }
+};
+
+export const listHalls = async (params?: { cinemaId?: string; name?: string }): Promise<Hall[]> => {
+    try {
+        const response = await protectedAxios.get(API.ADMIN.HALLS, { params });
+        return response.data?.data ?? [];
+    } catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+            throw new Error(error.response?.data?.message || "Failed to load halls");
+        }
+        if (error instanceof Error) {
+            throw new Error(error.message || "Failed to load halls");
+        }
+        throw new Error("Failed to load halls");
+    }
+};
+
+export const getHall = async (id: string): Promise<Hall | null> => {
+    try {
+        if (!id || id === "undefined" || !/^[0-9a-fA-F]{24}$/.test(id)) {
+            throw new Error("Invalid hall ID");
+        }
+        const response = await protectedAxios.get(API.ADMIN.HALL_DETAIL(id));
+        return response.data?.data ?? null;
+    } catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+            throw new Error(error.response?.data?.message || "Failed to load hall");
+        }
+        if (error instanceof Error) {
+            throw new Error(error.message || "Failed to load hall");
+        }
+        throw new Error("Failed to load hall");
+    }
+};
+
+export const updateHall = async (id: string, data: Partial<Hall>) => {
+    try {
+        if (!id || id === "undefined" || !/^[0-9a-fA-F]{24}$/.test(id)) {
+            throw new Error("Invalid hall ID");
+        }
+        const response = await protectedAxios.put(API.ADMIN.HALL_DETAIL(id), data);
+        return response.data;
+    } catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+            throw new Error(error.response?.data?.message || "Failed to update hall");
+        }
+        if (error instanceof Error) {
+            throw new Error(error.message || "Failed to update hall");
+        }
+        throw new Error("Failed to update hall");
+    }
+};
+
+export const deleteHall = async (id: string) => {
+    try {
+        if (!id || id === "undefined" || !/^[0-9a-fA-F]{24}$/.test(id)) {
+            throw new Error("Invalid hall ID");
+        }
+        const response = await protectedAxios.delete(API.ADMIN.HALL_DETAIL(id));
+        return response.data;
+    } catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+            throw new Error(error.response?.data?.message || "Failed to delete hall");
+        }
+        if (error instanceof Error) {
+            throw new Error(error.message || "Failed to delete hall");
+        }
+        throw new Error("Failed to delete hall");
     }
 };

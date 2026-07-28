@@ -55,6 +55,7 @@ export default function MovieDetailPage() {
     const [seatRecs, setSeatRecs] = useState<SeatRecommendation[]>([]);
     const [seatRecLoading, setSeatRecLoading] = useState(false);
     const [seatRecError, setSeatRecError] = useState("");
+    const [seatRecCount, setSeatRecCount] = useState(2);
     const { user } = useAuth();
 
     const cinemasWithShowtimes = useMemo(() => {
@@ -167,7 +168,8 @@ export default function MovieDetailPage() {
 
     const totalAmount = useMemo(() => {
         if (!selectedShowtime || selectedSeats.length === 0) return 0;
-        return selectedSeats.length * selectedShowtime.ticketPrice;
+        const price = selectedShowtime.effectivePrice ?? selectedShowtime.ticketPrice;
+        return selectedSeats.length * price;
     }, [selectedShowtime, selectedSeats]);
 
     const handleSelectSeat = (seatId: string, available: boolean) => {
@@ -185,7 +187,7 @@ export default function MovieDetailPage() {
         setSeatRecLoading(true);
         setSeatRecError("");
         try {
-            const result = await fetchSeatRecommendations(selectedShowtime._id, 2);
+            const result = await fetchSeatRecommendations(selectedShowtime._id, seatRecCount);
             if (result.success && result.data && result.data.length > 0) {
                 const best = result.data[0];
                 setSeatRecs(result.data);
@@ -214,10 +216,11 @@ export default function MovieDetailPage() {
         setError(null);
         setBookingMessage(null);
         try {
+            const price = selectedShowtime.effectivePrice ?? selectedShowtime.ticketPrice;
             const seatsPayload = selectedSeats.map((seatId) => ({
                 seatId,
                 label: seatId,
-                price: selectedShowtime.ticketPrice,
+                price,
             }));
 
             const booking = await submitBooking({
@@ -337,6 +340,7 @@ export default function MovieDetailPage() {
                                             setSelectedCinemaId(cinema._id);
                                             setSelectedShowtimeId(null);
                                             setSelectedSeats([]);
+                                            setSeatRecs([]);
                                         }}
                                         className={`w-full rounded-3xl border px-4 py-4 text-left transition ${selectedCinemaId === cinema._id ? "border-yellow-400 bg-yellow-400/5" : "border-white/10 bg-white/5 hover:border-white/30"}`}
                                     >
@@ -375,6 +379,7 @@ export default function MovieDetailPage() {
                                         onClick={() => {
                                             setSelectedShowtimeId(item._id);
                                             setSelectedSeats([]);
+                                            setSeatRecs([]);
                                         }}
                                         className={`w-full rounded-3xl border px-4 py-4 text-left transition ${selectedShowtimeId === item._id ? "border-yellow-400 bg-yellow-400/5" : "border-white/10 bg-white/5 hover:border-white/30"}`}
                                     >
@@ -383,7 +388,7 @@ export default function MovieDetailPage() {
                                                 <p className="text-sm text-gray-300">{new Date(item.showDate).toLocaleDateString()}</p>
                                                 <p className="mt-1 text-lg font-semibold text-white">{item.startTime} - {item.endTime || "TBD"}</p>
                                             </div>
-                                            <div className="rounded-3xl bg-white/5 px-4 py-2 text-sm text-yellow-300">${item.ticketPrice.toFixed(2)}</div>
+                                            <div className="rounded-3xl bg-white/5 px-4 py-2 text-sm text-yellow-300">${(item.effectivePrice ?? item.ticketPrice).toFixed(2)}</div>
                                         </div>
                                     </button>
                                 ))
@@ -397,7 +402,7 @@ export default function MovieDetailPage() {
                                 <h2 className="text-xl font-semibold">Select seats</h2>
                                 <p className="text-gray-500 text-sm">Tap available seats to add them to your booking.</p>
                             </div>
-                            <span className="text-sm text-gray-400">Price ${selectedShowtime?.ticketPrice?.toFixed(2) ?? 0} each</span>
+                            <span className="text-sm text-gray-400">Price ${(selectedShowtime?.effectivePrice ?? selectedShowtime?.ticketPrice)?.toFixed(2) ?? 0} each</span>
                         </div>
 
                         {selectedShowtime && !seatRecLoading && seatRecs.length > 0 && (
@@ -421,7 +426,24 @@ export default function MovieDetailPage() {
                             <p className="mt-2 text-sm text-rose-300">{seatRecError}</p>
                         )}
 
-                        <div className="mt-4 flex justify-end">
+                        <div className="mt-4 flex flex-wrap items-center gap-3 justify-end">
+                            <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2">
+                                <span className="text-xs text-gray-400">Seats:</span>
+                                {[1,2,3,4,5,6,7,8].map((n) => (
+                                    <button
+                                        key={n}
+                                        type="button"
+                                        onClick={() => setSeatRecCount(n)}
+                                        className={`h-8 w-8 rounded-full text-xs font-semibold transition ${
+                                            seatRecCount === n
+                                                ? "bg-yellow-400 text-black"
+                                                : "text-gray-400 hover:text-white"
+                                        }`}
+                                    >
+                                        {n}
+                                    </button>
+                                ))}
+                            </div>
                             <button
                                 type="button"
                                 onClick={handleSmartPick}

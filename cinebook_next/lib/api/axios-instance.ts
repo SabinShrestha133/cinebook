@@ -29,7 +29,7 @@ protectedAxios.interceptors.response.use(
             localStorage.removeItem("token");
             localStorage.removeItem("user");
             if (typeof window !== "undefined") {
-                window.location.href = "/frontend/login";
+                window.location.href = "/login";
             }
         }
         return Promise.reject(error);

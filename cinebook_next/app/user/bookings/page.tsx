@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { fetchMyBookings, BookingHistoryItem } from "@/lib/api/booking-history";
 import { Loader2 } from "lucide-react";
 
@@ -83,7 +84,7 @@ export default function BookingsPage() {
                             </div>
 
                             <div className="mt-4 text-sm text-gray-400 space-y-2">
-                                <p>Movie: <span className="text-white">{movieTitle(booking.movieId) || asString(booking.movieId)}</span></p>
+                                <p>Movie: <Link href={`/movies/${asString(booking.movieId)}`} className="text-white hover:text-yellow-400 transition">{movieTitle(booking.movieId) || asString(booking.movieId)}</Link></p>
                                 <p>Cinema: <span className="text-white">{cinemaName(booking.cinemaId) || asString(booking.cinemaId)}</span></p>
                                 <p>Hall: <span className="text-white">{hallName(booking.hallId) || asString(booking.hallId)}</span></p>
                                 <p>

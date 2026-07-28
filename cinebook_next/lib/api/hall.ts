@@ -89,6 +89,9 @@ export const listHalls = async (params?: { page?: number; limit?: number; search
 
 export const updateHall = async (id: string, payload: Partial<Hall>): Promise<Hall> => {
     try {
+        if (!id || id === "undefined" || !/^[0-9a-fA-F]{24}$/.test(id)) {
+            throw new Error("Invalid hall ID");
+        }
         const response = await protectedAxios.put(API.HALL.UPDATE(id), payload);
         return response.data?.data ?? ({} as Hall);
     } catch (error: unknown) {
@@ -104,6 +107,9 @@ export const updateHall = async (id: string, payload: Partial<Hall>): Promise<Ha
 
 export const deleteHall = async (id: string): Promise<void> => {
     try {
+        if (!id || id === "undefined" || !/^[0-9a-fA-F]{24}$/.test(id)) {
+            throw new Error("Invalid hall ID");
+        }
         await protectedAxios.delete(API.HALL.DELETE(id));
     } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
@@ -118,6 +124,9 @@ export const deleteHall = async (id: string): Promise<void> => {
 
 export const generateHallLayout = async (hallId: string): Promise<Hall> => {
     try {
+        if (!hallId || hallId === "undefined" || !/^[0-9a-fA-F]{24}$/.test(hallId)) {
+            throw new Error("Invalid hall ID");
+        }
         const response = await protectedAxios.post(API.HALL.GENERATE(hallId));
         return response.data?.data ?? ({} as Hall);
     } catch (error: unknown) {
@@ -133,6 +142,9 @@ export const generateHallLayout = async (hallId: string): Promise<Hall> => {
 
 export const getSeatsByHall = async (hallId: string): Promise<Seat[]> => {
     try {
+        if (!hallId || hallId === "undefined" || !/^[0-9a-fA-F]{24}$/.test(hallId)) {
+            throw new Error("Invalid hall ID");
+        }
         const response = await publicAxios.get(API.HALL.SEATS(hallId));
         return response.data?.data ?? [];
     } catch (error: unknown) {

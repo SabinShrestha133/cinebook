@@ -1,6 +1,6 @@
 import UserNavbar from "@/components/nav/UserNavbar";
 
-export default function UserLayout({
+export default function MoviesLayout({
     children,
 }: {
     children: React.ReactNode;

@@ -5,6 +5,8 @@ export const API = {
         LOGIN: "/api/v1/auth/login",
         WHOAMI: "/api/v1/auth/whoami",
         UPDATE_PROFILE: "/api/v1/auth/update",
+        REQUEST_PASSWORD_RESET: "/api/v1/auth/request-password-reset",
+        RESET_PASSWORD: (token: string): string => `/api/v1/auth/reset-password/${token}`,
     },
     MOVIE: {
         BROWSE: "/api/v1/movies",
@@ -22,6 +24,10 @@ export const API = {
         USERS: "/api/v1/admin/users",
         USER_DETAIL: (id: string) => `/api/v1/admin/users/${id}`,
         BOOKINGS: "/api/v1/admin/bookings",
+        SHOWTIMES: "/api/v1/admin/showtimes",
+        SHOWTIME_DETAIL: (id: string) => `/api/v1/admin/showtimes/${id}`,
+        HALLS: "/api/v1/admin/halls",
+        HALL_DETAIL: (id: string) => `/api/v1/admin/halls/${id}`,
     },
     SUPER_ADMIN: {
         LIST_ADMINS: "/api/v1/super-admin/admins",
@@ -63,6 +69,13 @@ export const API = {
     },
     AI_RECOMMENDATION: {
         MOVIES: "/api/v1/ai/recommendations/movies",
+    },
+    DAY_DISCOUNT: {
+        LIST: "/api/v1/day-discounts",
+        DETAIL: (id: string) => `/api/v1/day-discounts/${id}`,
+        CREATE: "/api/v1/day-discounts",
+        UPDATE: (id: string) => `/api/v1/day-discounts/${id}`,
+        DELETE: (id: string) => `/api/v1/day-discounts/${id}`,
     },
 };
 

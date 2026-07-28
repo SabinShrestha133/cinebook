@@ -1,6 +1,6 @@
 import UserNavbar from "@/components/nav/UserNavbar";
 
-export default function UserLayout({
+export default function BookingLayout({
     children,
 }: {
     children: React.ReactNode;
@@ -8,9 +8,7 @@ export default function UserLayout({
     return (
         <div className="min-h-screen bg-[var(--bg-primary)]">
             <UserNavbar />
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {children}
-            </main>
+            <main>{children}</main>
         </div>
     );
 }

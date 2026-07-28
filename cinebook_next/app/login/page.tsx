@@ -53,7 +53,7 @@ export default function LoginPage() {
     }, [router, startTransition, login]);
 
     return (
-        <div className="min-h-screen bg-black flex items-center justify-center p-6 relative">
+        <div className="min-h-screen bg-[var(--bg-primary)] flex items-center justify-center p-6 relative">
             <div
                 className="fixed inset-0 pointer-events-none opacity-[0.03] z-0"
                 style={{
@@ -63,71 +63,71 @@ export default function LoginPage() {
                 }}
             />
 
-            <div className="relative z-10 w-full max-w-sm bg-[#1a1a1a] rounded-2xl shadow-2xl px-8 py-10 border border-white/5">
+            <div className="relative z-10 w-full max-w-sm bg-[var(--card-bg)] rounded-2xl shadow-2xl px-8 py-10 border border-[var(--card-border)]">
                 <div className="flex flex-col items-center mb-8">
                     <div className="mb-3">
                         <Image src={logo} alt="CineBook Logo" width={52} height={52} className="w-auto h-auto" />
                     </div>
-                    <h1 className="text-white text-2xl font-bold tracking-[0.15em] uppercase">
+                    <h1 className="text-[var(--text-primary)] text-2xl font-bold tracking-[0.15em] uppercase">
                         Cine<span className="text-[#e63329]">Book</span>
                     </h1>
-                    <p className="text-gray-500 text-[10px] tracking-[0.25em] uppercase mt-1">Movie Ticket Booking System</p>
+                    <p className="text-[var(--text-tertiary)] text-[10px] tracking-[0.25em] uppercase mt-1">Movie Ticket Booking System</p>
                     <div className="w-8 h-px bg-[#e63329] mt-3" />
                 </div>
 
                 <div className="text-center mb-7">
-                    <h2 className="text-white text-lg font-semibold">Welcome Back</h2>
-                    <p className="text-gray-500 text-sm mt-1">Please enter your details to sign in</p>
+                    <h2 className="text-[var(--text-primary)] text-lg font-semibold">Welcome Back</h2>
+                    <p className="text-[var(--text-tertiary)] text-sm mt-1">Please enter your details to sign in</p>
                 </div>
 
                 {error && (
-                    <div className="mb-4 p-3 bg-red-500/10 border border-red-500/50 rounded text-red-400 text-sm">
+                    <div className="mb-4 p-3 bg-[var(--error)]/10 border border-[var(--error)]/50 rounded text-[var(--error)] text-sm">
                         {error}
                     </div>
                 )}
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                     <div>
-                        <label className="block text-gray-400 text-xs font-medium mb-1.5 tracking-wide uppercase">
+                        <label className="block text-[var(--text-secondary)] text-xs font-medium mb-1.5 tracking-wide uppercase">
                             Email Address
                         </label>
                         <div className="relative">
-                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500">
+                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]">
                                 <Mail className="w-4 h-4" />
                             </span>
                             <input
                                 type="email"
                                 placeholder="name@example.com"
                                 {...register("email")}
-                                className="w-full bg-[#111] border border-white/10 rounded-lg pl-10 pr-4 py-3 text-sm text-white placeholder-gray-600 outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400/20 transition"
+                                className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg pl-10 pr-4 py-3 text-sm text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400/20 transition"
                             />
                         </div>
-                        {errors.email && <span className="text-red-400 text-xs mt-1 block">{errors.email.message}</span>}
+                        {errors.email && <span className="text-[var(--error)] text-xs mt-1 block">{errors.email.message}</span>}
                     </div>
 
                     <div>
-                        <label className="block text-gray-400 text-xs font-medium mb-1.5 tracking-wide uppercase">
+                        <label className="block text-[var(--text-secondary)] text-xs font-medium mb-1.5 tracking-wide uppercase">
                             Password
                         </label>
                         <div className="relative">
-                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500">
+                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]">
                                 <Lock className="w-4 h-4" />
                             </span>
                             <input
                                 type={showPassword ? "text" : "password"}
                                 placeholder="••••••••"
                                 {...register("password")}
-                                className="w-full bg-[#111] border border-white/10 rounded-lg pl-10 pr-10 py-3 text-sm text-white placeholder-gray-600 outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400/20 transition"
+                                className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg pl-10 pr-10 py-3 text-sm text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400/20 transition"
                             />
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition"
+                                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition"
                             >
                                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                             </button>
                         </div>
-                        {errors.password && <span className="text-red-400 text-xs mt-1 block">{errors.password.message}</span>}
+                        {errors.password && <span className="text-[var(--error)] text-xs mt-1 block">{errors.password.message}</span>}
                     </div>
 
                     <button
@@ -147,15 +147,20 @@ export default function LoginPage() {
                 </form>
 
                 <div className="flex items-center gap-3 my-6">
-                    <div className="flex-1 h-px bg-white/8" />
-                    <span className="text-gray-600 text-xs">or</span>
-                    <div className="flex-1 h-px bg-white/8" />
+                    <div className="flex-1 h-px bg-[var(--border-color)]" />
+                    <span className="text-[var(--text-tertiary)] text-xs">or</span>
+                    <div className="flex-1 h-px bg-[var(--border-color)]" />
                 </div>
 
-                <p className="text-center text-gray-500 text-sm">
+                <p className="text-center text-[var(--text-tertiary)] text-sm">
                     Don&apos;t have an account?{" "}
                     <Link href="/register" className="text-yellow-400 hover:text-yellow-300 font-semibold transition">
                         Create one
+                    </Link>
+                </p>
+                <p className="text-center text-[var(--text-tertiary)] text-sm mt-2">
+                    <Link href="/forget-password" className="text-yellow-400 hover:text-yellow-300 font-semibold transition">
+                        Forgot password?
                     </Link>
                 </p>
             </div>
