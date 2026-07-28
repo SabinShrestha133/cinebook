@@ -12,21 +12,21 @@ export class SeatRepository {
     }
 
     async findByHallId(hallId: string) {
-        return SeatModel.find({ hallId }).sort({ positionIndex: 1 }).lean();
+        return SeatModel.find({ hallId: new mongoose.Types.ObjectId(hallId), isDeleted: { $ne: true } }).sort({ positionIndex: 1 }).lean();
     }
 
     async findById(id: string) {
-        return SeatModel.findById(id).lean();
+        return SeatModel.findOne({ _id: id, isDeleted: { $ne: true } }).lean();
     }
 
     async update(id: string, data: Partial<ISeat>) {
-        return SeatModel.findByIdAndUpdate(id, data, { new: true }).lean();
+        return SeatModel.findOneAndUpdate({ _id: id, isDeleted: { $ne: true } }, data, { new: true }).lean();
     }
 
     async bulkUpdate(hallId: string, updates: { seatId: string; data: Partial<ISeat> }[]) {
         const bulkOps = updates.map((u) => ({
             updateOne: {
-                filter: { _id: new mongoose.Types.ObjectId(u.seatId), hallId: new mongoose.Types.ObjectId(hallId) },
+                filter: { _id: new mongoose.Types.ObjectId(u.seatId), hallId: new mongoose.Types.ObjectId(hallId), isDeleted: { $ne: true } },
                 update: { $set: u.data },
             },
         }));
@@ -35,6 +35,13 @@ export class SeatRepository {
 
     async deleteByHallId(hallId: string) {
         return SeatModel.deleteMany({ hallId: new mongoose.Types.ObjectId(hallId) });
+    }
+
+    async softDeleteByHallId(hallId: string, deletedBy: string) {
+        return SeatModel.updateMany(
+            { hallId: new mongoose.Types.ObjectId(hallId), isDeleted: { $ne: true } },
+            { isDeleted: true, deletedAt: new Date(), deletedBy: new mongoose.Types.ObjectId(deletedBy) }
+        );
     }
 
     async findAvailableByShowtime(showtimeId: string) {
@@ -48,6 +55,7 @@ export class SeatRepository {
         return SeatModel.find({
             hallId: showtime.hallId,
             status: "active",
+            isDeleted: { $ne: true },
             _id: { $nin: bookedObjectIds },
         }).lean();
     }
