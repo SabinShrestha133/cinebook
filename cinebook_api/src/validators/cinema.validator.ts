@@ -7,10 +7,7 @@ export const createCinemaSchema = z.object({
     description: z.string().optional(),
     contactEmail: z.string().email("Invalid email").optional().or(z.literal("")),
     contactPhone: z.string().optional(),
-    isActive: z.preprocess(
-        (v) => v === "true" || v === true,
-        z.boolean().optional()
-    ),
+    isActive: z.boolean().optional(),
 });
 
 export const updateCinemaSchema = z.object({
@@ -20,11 +17,5 @@ export const updateCinemaSchema = z.object({
     description: z.string().optional(),
     contactEmail: z.string().email("Invalid email").optional().or(z.literal("")),
     contactPhone: z.string().optional(),
-    isActive: z.preprocess(
-        (v) => v === "true" || v === true,
-        z.boolean().optional()
-    ),
+    isActive: z.boolean().optional(),
 });
-
-export type CreateCinemaInput = z.infer<typeof createCinemaSchema>;
-export type UpdateCinemaInput = z.infer<typeof updateCinemaSchema>;
