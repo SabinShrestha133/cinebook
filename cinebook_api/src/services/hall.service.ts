@@ -21,8 +21,10 @@ function getRowLabel(rowIndex: number): string {
 
 export class HallService {
     async createHall(payload: { name: string; cinemaId: string; totalRows: number; seatsPerRow: number; aisles?: number[] }) {
+        console.log("[HALL SERVICE] createHall payload:", JSON.stringify(payload, null, 2));
+        console.log("[HALL SERVICE] cinemaId value:", JSON.stringify(payload.cinemaId), "type:", typeof payload.cinemaId);
         if (!mongoose.Types.ObjectId.isValid(payload.cinemaId)) {
-            throw new Error("Invalid Cinema ID");
+            throw new Error("Invalid Cinema ID: " + payload.cinemaId);
         }
         const hall = await hallRepo.create({
             name: payload.name,
@@ -56,7 +58,7 @@ export class HallService {
         return hall;
     }
 
-    async deleteHall(id: string) {
+    async deleteHall(id: string, deletedBy: string) {
         const hall = await hallRepo.findById(id);
         if (!hall) throw new HttpException(404, "Hall not found");
 
@@ -69,9 +71,9 @@ export class HallService {
             throw new HttpException(400, "Cannot delete hall with active showtimes");
         }
 
-        await seatRepo.deleteByHallId(id);
-        await hallRowRepo.deleteByHallId(id);
-        await hallRepo.delete(id);
+        await seatRepo.softDeleteByHallId(id, deletedBy);
+        await hallRowRepo.softDeleteByHallId(id, deletedBy);
+        await hallRepo.softDelete(id, deletedBy);
     }
 
     async generateHallLayout(hallId: string) {
