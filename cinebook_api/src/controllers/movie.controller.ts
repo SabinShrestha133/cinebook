@@ -6,7 +6,6 @@ import { uploadToCloudinary } from "../utils/cloudinary.util";
 export class MovieController {
     async create(req: Request, res: Response) {
         try {
-            // handle file upload if present
             if (req.file && req.file.path) {
                 const url = await uploadToCloudinary(req.file.path, 'movies');
                 req.body.posterUrl = url;
@@ -35,6 +34,17 @@ export class MovieController {
             return ApiResponseHelper.success(res, movies, "Movies fetched");
         } catch (err: any) {
             return ApiResponseHelper.error(res, err.message || "Error listing movies", 500);
+        }
+    }
+
+    async update(req: Request, res: Response) {
+        try {
+            const id = String(req.params.id);
+            const movie = await movieService.update(id, req.body);
+            if (!movie) return ApiResponseHelper.error(res, "Not found", 404);
+            return ApiResponseHelper.success(res, movie, "Movie updated");
+        } catch (err: any) {
+            return ApiResponseHelper.error(res, err.message || "Error updating movie", 500);
         }
     }
 }

@@ -3,9 +3,14 @@ import { hallService } from "../services/hall.service";
 import { ApiResponseHelper } from "../utils/apihelper.util";
 import { createHallSchema, updateHallSchema, generateHallSchema } from "../validators/hall.validator";
 import { validateBody } from "../middlewares/validate.middleware";
+import mongoose from "mongoose";
 
 function getId(req: Request) {
-    return String(req.params.id);
+    const id = String(req.params.id || "");
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        throw new Error("Invalid ID format");
+    }
+    return id;
 }
 
 export class HallController {
@@ -14,6 +19,14 @@ export class HallController {
             const hall = await hallService.createHall(req.body);
             return ApiResponseHelper.success(res, hall, "Hall created successfully", 201);
         } catch (err: any) {
+            console.error("[HALL CREATE] Error:", err);
+            if (err?.name === "CastError") {
+                console.error("[HALL CREATE] CastError details:", {
+                    path: err.path,
+                    value: err.value,
+                    kind: err.kind,
+                });
+            }
             return ApiResponseHelper.error(res, err.message || "Error creating hall", 500);
         }
     }
@@ -60,7 +73,12 @@ export class HallController {
 
     async delete(req: Request, res: Response) {
         try {
-            await hallService.deleteHall(getId(req));
+            const id = getId(req);
+            const deletedBy = req.user?._id;
+            if (!deletedBy) {
+                return ApiResponseHelper.error(res, "Unauthorized", 401);
+            }
+            await hallService.deleteHall(id, deletedBy.toString());
             return ApiResponseHelper.success(res, null, "Hall deleted");
         } catch (err: any) {
             return ApiResponseHelper.error(res, err.message || "Error deleting hall", 500);
