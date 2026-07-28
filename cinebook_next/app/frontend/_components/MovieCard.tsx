@@ -1,6 +1,5 @@
-"use client";
-
 import Link from "next/link";
+import Image from "next/image";
 import { Movie } from "@/lib/api/movie";
 
 function formatDuration(minutes?: number) {
@@ -25,7 +24,7 @@ function statusStyles(status?: string) {
 
 export default function MovieCard({ movie }: { movie: Movie }) {
     const genreList = movie.genres?.join(", ") ?? "Drama";
-    const poster = movie.posterUrl || "/uploads/default-movie-poster.png";
+    const poster = movie.posterUrl || "/uploads/default-movie-poster.svg";
     const statusLabel = movie.status?.replace("_", " ") ?? "Now showing";
     const badgeClass = statusStyles(movie.status);
 
@@ -34,9 +33,10 @@ export default function MovieCard({ movie }: { movie: Movie }) {
             href={`/movies/${movie._id}`}
             className="group relative block h-72 bg-[#111] border border-white/10 rounded-3xl overflow-hidden shadow-xl shadow-black/20 transition-all duration-500 hover:z-10 hover:scale-[1.02] hover:border-yellow-400/40 hover:shadow-2xl hover:shadow-black/60 cursor-pointer"
         >
-            <img
+            <Image
                 src={poster}
                 alt={movie.title}
+                fill
                 className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
