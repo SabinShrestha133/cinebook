@@ -1,4 +1,4 @@
-import { login, register, whoami, updateProfile } from "../api/auth";
+import { login, register, whoami, updateProfile, requestPasswordReset, resetPassword } from "../api/auth";
 
 export const handleLoginUser = async (data: { email: string; password: string }) => {
     try {
@@ -71,6 +71,38 @@ export const handleUpdateUser = async (formData: FormData) => {
         return { success: false, message: result?.message || "Update user failed" };
     } catch (error: unknown) {
         let message = "Update user failed";
+        if (error instanceof Error) {
+            message = error.message;
+        }
+        return { success: false, message };
+    }
+};
+
+export const handleRequestPasswordReset = async (email: string) => {
+    try {
+        const result = await requestPasswordReset(email);
+        if (result.success) {
+            return { success: true, message: result.message, data: result.data };
+        }
+        return { success: false, message: result.message || "Request password reset failed" };
+    } catch (error: unknown) {
+        let message = "Request password reset failed";
+        if (error instanceof Error) {
+            message = error.message;
+        }
+        return { success: false, message };
+    }
+};
+
+export const handleResetPassword = async (token: string, newPassword: string) => {
+    try {
+        const result = await resetPassword(token, newPassword);
+        if (result.success) {
+            return { success: true, message: result.message };
+        }
+        return { success: false, message: result.message || "Reset password failed" };
+    } catch (error: unknown) {
+        let message = "Reset password failed";
         if (error instanceof Error) {
             message = error.message;
         }
