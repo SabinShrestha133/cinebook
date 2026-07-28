@@ -6,8 +6,9 @@ import { fetchAiMovieRecommendations, type AiMovieRecommendation } from "@/lib/a
 import { Movie } from "@/lib/api/movie";
 import MovieCard from "@/app/frontend/_components/MovieCard";
 import Link from "next/link";
-import { Loader2, Sparkles } from "lucide-react";
+import { Loader2, Sparkles, Filter, X } from "lucide-react";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import GenreModal from "@/components/GenreModal";
 
 type Tab = "now_showing" | "upcoming";
 
@@ -19,6 +20,8 @@ export default function MoviesPage() {
     const [aiRecommendations, setAiRecommendations] = useState<AiMovieRecommendation[]>([]);
     const [aiLoading, setAiLoading] = useState(false);
     const [aiError, setAiError] = useState("");
+    const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
+    const [genreModalOpen, setGenreModalOpen] = useState(false);
     const { user } = useAuth();
 
     useEffect(() => {
@@ -68,11 +71,23 @@ export default function MoviesPage() {
 
     const displayedMovies = useMemo(() => {
         const base = movies.filter((m) => m.status !== "archived");
-        return base.filter((m) => m.status === activeTab);
-    }, [movies, activeTab]);
+        const filtered = base.filter((m) => m.status === activeTab);
+        if (selectedGenres.length === 0) return filtered;
+        return filtered.filter((m) => m.genres?.some((g) => selectedGenres.includes(g)) ?? false);
+    }, [movies, activeTab, selectedGenres]);
 
     const nowShowingCount = movies.filter((m) => m.status === "now_showing").length;
     const upcomingCount = movies.filter((m) => m.status === "upcoming").length;
+
+    const removeGenre = (genre: string) => {
+        setSelectedGenres((prev) => prev.filter((g) => g !== genre));
+    };
+
+    const clearAllGenreFilters = () => {
+        setSelectedGenres([]);
+    };
+
+    const hasActiveGenreFilters = selectedGenres.length > 0;
 
     return (
         <div className="min-h-screen bg-black py-10">
@@ -110,7 +125,11 @@ export default function MoviesPage() {
                         <p className="text-sm text-gray-400 mb-4">Based on your watch history and preferences.</p>
                         <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
                             {aiRecommendations.map((rec) => (
-                                <div key={rec.movieId} className="rounded-[2rem] border border-white/10 bg-[#111] p-5 shadow-black/20 shadow-sm">
+                                <Link
+                                    key={rec.movieId}
+                                    href={`/movies/${rec.movieId}`}
+                                    className="block rounded-[2rem] border border-white/10 bg-[#111] p-5 shadow-black/20 shadow-sm transition hover:border-yellow-400/40 hover:shadow-2xl hover:shadow-black/60"
+                                >
                                     <div className="flex items-start justify-between gap-3 mb-3">
                                         <h3 className="text-lg font-semibold text-white">{rec.title}</h3>
                                         <span className="shrink-0 rounded-full bg-yellow-400/10 px-3 py-1 text-xs font-semibold text-yellow-300">
@@ -118,7 +137,7 @@ export default function MoviesPage() {
                                         </span>
                                     </div>
                                     <p className="text-sm text-gray-400 leading-relaxed">{rec.reason}</p>
-                                </div>
+                                </Link>
                             ))}
                         </div>
                     </div>
@@ -162,6 +181,50 @@ export default function MoviesPage() {
                     </div>
                 </div>
 
+                {hasActiveGenreFilters && (
+                    <div className="flex flex-wrap items-center gap-2 mb-6">
+                        {selectedGenres.map((genre) => (
+                            <span
+                                key={genre}
+                                className="inline-flex items-center gap-1.5 rounded-full bg-yellow-400/10 border border-yellow-400/20 px-3 py-1 text-xs font-semibold text-yellow-300"
+                            >
+                                {genre}
+                                <button type="button" onClick={() => removeGenre(genre)} className="hover:text-yellow-100 transition">
+                                    <X className="w-3 h-3" />
+                                </button>
+                            </span>
+                        ))}
+                        <button
+                            type="button"
+                            onClick={clearAllGenreFilters}
+                            className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-gray-400 transition hover:text-white"
+                        >
+                            <X className="w-3 h-3" />
+                            Clear all
+                        </button>
+                    </div>
+                )}
+
+                <div className="mb-2 flex items-center gap-2">
+                    <button
+                        type="button"
+                        onClick={() => setGenreModalOpen(true)}
+                        className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition ${
+                            hasActiveGenreFilters
+                                ? "border-yellow-400/50 bg-yellow-400/10 text-yellow-300"
+                                : "border-white/10 bg-white/5 text-gray-300 hover:border-yellow-400/50"
+                        }`}
+                    >
+                        <Filter className="w-4 h-4" />
+                        Filter by Genre
+                        {hasActiveGenreFilters && (
+                            <span className="rounded-full bg-yellow-400 text-black text-[10px] font-bold px-1.5 py-0.5 leading-none">
+                                {selectedGenres.length}
+                            </span>
+                        )}
+                    </button>
+                </div>
+
                 {loading ? (
                     <div className="rounded-3xl border border-white/10 bg-[#111] p-10 text-center text-gray-400">Loading movies…</div>
                 ) : error ? (
@@ -178,6 +241,13 @@ export default function MoviesPage() {
                     </div>
                 )}
             </div>
+
+            <GenreModal
+                isOpen={genreModalOpen}
+                onClose={() => setGenreModalOpen(false)}
+                selectedGenres={selectedGenres}
+                onSelect={setSelectedGenres}
+            />
         </div>
     );
 }

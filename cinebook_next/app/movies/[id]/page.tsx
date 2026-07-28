@@ -168,7 +168,8 @@ export default function MovieDetailPage() {
 
     const totalAmount = useMemo(() => {
         if (!selectedShowtime || selectedSeats.length === 0) return 0;
-        return selectedSeats.length * selectedShowtime.ticketPrice;
+        const price = selectedShowtime.effectivePrice ?? selectedShowtime.ticketPrice;
+        return selectedSeats.length * price;
     }, [selectedShowtime, selectedSeats]);
 
     const handleSelectSeat = (seatId: string, available: boolean) => {
@@ -215,10 +216,11 @@ export default function MovieDetailPage() {
         setError(null);
         setBookingMessage(null);
         try {
+            const price = selectedShowtime.effectivePrice ?? selectedShowtime.ticketPrice;
             const seatsPayload = selectedSeats.map((seatId) => ({
                 seatId,
                 label: seatId,
-                price: selectedShowtime.ticketPrice,
+                price,
             }));
 
             const booking = await submitBooking({
@@ -386,7 +388,7 @@ export default function MovieDetailPage() {
                                                 <p className="text-sm text-gray-300">{new Date(item.showDate).toLocaleDateString()}</p>
                                                 <p className="mt-1 text-lg font-semibold text-white">{item.startTime} - {item.endTime || "TBD"}</p>
                                             </div>
-                                            <div className="rounded-3xl bg-white/5 px-4 py-2 text-sm text-yellow-300">${item.ticketPrice.toFixed(2)}</div>
+                                            <div className="rounded-3xl bg-white/5 px-4 py-2 text-sm text-yellow-300">${(item.effectivePrice ?? item.ticketPrice).toFixed(2)}</div>
                                         </div>
                                     </button>
                                 ))
@@ -400,7 +402,7 @@ export default function MovieDetailPage() {
                                 <h2 className="text-xl font-semibold">Select seats</h2>
                                 <p className="text-gray-500 text-sm">Tap available seats to add them to your booking.</p>
                             </div>
-                            <span className="text-sm text-gray-400">Price ${selectedShowtime?.ticketPrice?.toFixed(2) ?? 0} each</span>
+                            <span className="text-sm text-gray-400">Price ${(selectedShowtime?.effectivePrice ?? selectedShowtime?.ticketPrice)?.toFixed(2) ?? 0} each</span>
                         </div>
 
                         {selectedShowtime && !seatRecLoading && seatRecs.length > 0 && (
