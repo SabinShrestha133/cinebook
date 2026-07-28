@@ -9,5 +9,9 @@ router.get("/admins", authenticate, superAdminMiddleware, audit("Admin", "LIST_A
 router.post("/admins", authenticate, superAdminMiddleware, audit("Admin", "CREATE_ADMIN"), superAdminController.createAdmin.bind(superAdminController));
 router.put("/admins/:id/active", authenticate, superAdminMiddleware, audit("Admin", "SET_ADMIN_ACTIVE"), superAdminController.setActive.bind(superAdminController));
 router.put("/admins/:id", authenticate, superAdminMiddleware, audit("Admin", "UPDATE_ADMIN"), superAdminController.updateAdmin.bind(superAdminController));
+router.get("/admins", authenticate, superAdminMiddleware, superAdminController.listAdmins.bind(superAdminController));
+router.post("/admins", authenticate, superAdminMiddleware, superAdminController.createAdmin.bind(superAdminController));
+router.put("/admins/:id/active", authenticate, superAdminMiddleware, superAdminController.setActive.bind(superAdminController));
+router.put("/admins/:id", authenticate, superAdminMiddleware, superAdminController.updateAdmin.bind(superAdminController));
 
 export default router;

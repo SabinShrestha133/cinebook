@@ -140,6 +140,45 @@ export class AdminService {
         };
     }
 
+    async listBookings(filters: { cinemaId?: string; movieId?: string; userId?: string } = {}) {
+        const query: Record<string, unknown> = {};
+        if (filters.cinemaId) query.cinemaId = filters.cinemaId;
+        if (filters.movieId) query.movieId = filters.movieId;
+        if (filters.userId) query.userId = filters.userId;
+
+        const bookings = await BookingModel.find(query)
+            .populate("userId", "name email username")
+            .populate("movieId", "title slug")
+            .populate("cinemaId", "name")
+            .populate("showtimeId", "showDate startTime endTime hallId")
+            .sort({ createdAt: -1 })
+            .lean();
+
+        return bookings.map((b: any) => ({
+            _id: String(b._id),
+            user: {
+                _id: String(b.userId?._id),
+                name: b.userId?.name || b.userId?.username || "Unknown",
+                email: b.userId?.email || "",
+            },
+            movieTitle: b.movieId?.title || "Unknown",
+            movieSlug: b.movieId?.slug || "",
+            cinemaName: b.cinemaId?.name || "Unknown",
+            showtime: {
+                showDate: b.showtimeId?.showDate,
+                startTime: b.showtimeId?.startTime || "",
+                endTime: b.showtimeId?.endTime || "",
+            },
+            seats: b.seats || [],
+            seatCount: b.seatCount,
+            totalAmount: b.totalAmount,
+            bookingStatus: b.bookingStatus,
+            paymentStatus: b.paymentStatus,
+            bookingCode: b.bookingCode,
+            createdAt: b.createdAt,
+        }));
+    }
+
     async updateUser(userId: string, payload: Partial<IUser>) {
         const updated = await userRepo.update(userId, payload);
         if (!updated) {

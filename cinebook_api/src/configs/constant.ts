@@ -18,6 +18,10 @@ export const CLIENT_URL: string =
 
 export const KHALTI_SECRET_KEY: string =
     process.env.KHALTI_SECRET_KEY || "26d864da638440a7a2170efdd5d09de7";
+    process.env.CLIENT_URL || 'http://localhost:3001';
+
+export const KHALTI_SECRET_KEY: string =
+    process.env.KHALTI_SECRET_KEY || "";
 export const KHALTI_INITIATE_URL: string =
     process.env.KHALTI_INITIATE_URL || "https://dev.khalti.com/api/v2/epayment/initiate/";
 export const KHALTI_VERIFY_URL: string =

@@ -3,6 +3,8 @@ import { adminController } from "../controllers/admin.controller";
 import { authenticate, adminMiddleware } from "../middlewares/authorized.middleware";
 import { permission } from "../middlewares/permission.middleware";
 import { audit } from "../middlewares/audit.middleware";
+import { authenticate, adminMiddleware, requirePermission } from "../middlewares/authorized.middleware";
+import { PERMISSIONS } from "../constants";
 
 const router = Router();
 
@@ -24,5 +26,11 @@ router.get("/halls", authenticate, adminMiddleware, audit("Hall", "LIST_HALLS"),
 router.get("/halls/:id", authenticate, adminMiddleware, audit("Hall", "VIEW_HALL"), adminController.getHall.bind(adminController));
 router.put("/halls/:id", authenticate, adminMiddleware, permission("hall:manage"), audit("Hall", "UPDATE_HALL"), adminController.updateHall.bind(adminController));
 router.delete("/halls/:id", authenticate, adminMiddleware, permission("hall:manage"), audit("Hall", "DELETE_HALL"), adminController.deleteHall.bind(adminController));
+router.get("/users", authenticate, adminMiddleware, requirePermission(PERMISSIONS.USER_MANAGE), adminController.listUsers.bind(adminController));
+router.get("/users/:id", authenticate, adminMiddleware, requirePermission(PERMISSIONS.USER_MANAGE), adminController.getUserDetails.bind(adminController));
+router.put("/users/:id", authenticate, adminMiddleware, requirePermission(PERMISSIONS.USER_MANAGE), adminController.updateUser.bind(adminController));
+router.delete("/users/:id", authenticate, adminMiddleware, requirePermission(PERMISSIONS.USER_MANAGE), adminController.deleteUser.bind(adminController));
+
+router.get("/bookings", authenticate, adminMiddleware, requirePermission(PERMISSIONS.BOOKING_VIEW), adminController.listBookings.bind(adminController));
 
 export default router;

@@ -41,6 +41,18 @@ export class AdminController {
         }
     }
 
+    async listBookings(req: Request, res: Response) {
+        try {
+            const cinemaId = req.query.cinemaId as string | undefined;
+            const movieId = req.query.movieId as string | undefined;
+            const userId = req.query.userId as string | undefined;
+            const bookings = await adminService.listBookings({ cinemaId, movieId, userId });
+            return ApiResponseHelper.success(res, bookings, "Bookings fetched");
+        } catch (err: any) {
+            return ApiResponseHelper.error(res, err.message || "Error fetching bookings", 500);
+        }
+    }
+
     async updateUser(req: Request, res: Response) {
         try {
             const id = String(req.params.id);

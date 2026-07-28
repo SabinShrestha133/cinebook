@@ -21,6 +21,8 @@ export class SuperAdminService {
 
     async updateAdmin(id: string, payload: Partial<IUser>) {
         return userRepo.update(id, payload);
+    async updateAdmin(id: string, payload: { isActive?: boolean; permissions?: string[] }) {
+        return userRepo.update(id, payload as Partial<IUser>);
     }
 }
 

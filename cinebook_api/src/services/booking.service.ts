@@ -8,6 +8,7 @@ import jwt from "jsonwebtoken";
 import QRCode from "qrcode";
 import { BookingStatus, PaymentStatus } from "../enums/booking.enums";
 import { SECRET_KEY } from "../configs/constant";
+import { BookingStatus, PaymentStatus } from "../enums/booking.enums";
 
 const bookingRepo = new BookingRepository();
 
@@ -109,6 +110,15 @@ export class BookingService {
 
         if (actualAmountPaisa !== expectedAmountPaisa) {
             throw new Error(`Payment amount mismatch. Expected ${expectedAmountPaisa}, got ${actualAmountPaisa}`);
+        return { ...payment, bookingId };
+    }
+
+    async verifyPayment(bookingId: string, pidx: string) {
+        const verification = await paymentService.verifyPayment(pidx);
+        const booking = await bookingRepo.findById(bookingId);
+
+        if (!booking) {
+            throw new Error("Booking not found");
         }
 
         if (verification.status === "Completed") {
@@ -139,6 +149,9 @@ export class BookingService {
             bookingStatus: BookingStatus.Confirmed,
             paymentStatus: PaymentStatus.Paid,
             ticketJwt,
+        await bookingRepo.update(bookingId, {
+            bookingStatus: BookingStatus.Confirmed,
+            paymentStatus: PaymentStatus.Paid,
         });
 
         return bookingRepo.findById(bookingId);
