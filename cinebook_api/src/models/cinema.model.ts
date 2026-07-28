@@ -9,6 +9,9 @@ export interface ICinema extends Document {
     contactEmail?: string;
     contactPhone?: string;
     isActive: boolean;
+    isDeleted: boolean;
+    deletedAt?: Date;
+    deletedBy?: mongoose.Types.ObjectId;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -23,6 +26,9 @@ const CinemaSchema: Schema = new Schema<ICinema>(
         contactEmail: { type: String },
         contactPhone: { type: String },
         isActive: { type: Boolean, default: true },
+        isDeleted: { type: Boolean, default: false },
+        deletedAt: { type: Date },
+        deletedBy: { type: Schema.Types.ObjectId, ref: "User" },
     },
     { timestamps: true }
 );
