@@ -1,30 +1,54 @@
+import mongoose from "mongoose";
 import { UserMongoRepository } from "../repositories/user.repository";
 import { BookingModel } from "../models/booking.model";
 import { MovieModel } from "../models/movie.model";
 import { CinemaModel } from "../models/cinema.model";
+import { ShowtimeModel } from "../models/showtime.model";
+import { HallModel } from "../models/hall.model";
 import { IUser } from "../models/user.model";
 
 const userRepo = new UserMongoRepository();
 
 export class AdminService {
     async dashboardSummary(cinemaId?: string) {
-        const totalBookings = await BookingModel.countDocuments(cinemaId ? { cinemaId } : {});
-        const totalMovies = await MovieModel.countDocuments();
-        const totalCinemas = await CinemaModel.countDocuments();
+        const match: any = { isDeleted: { $ne: true } };
+        if (cinemaId) {
+            match.cinemaId = new mongoose.Types.ObjectId(cinemaId);
+        }
+
+        const totalBookings = await BookingModel.countDocuments(match);
+        const totalMovies = await MovieModel.countDocuments({ isDeleted: { $ne: true } });
+        const totalCinemas = await CinemaModel.countDocuments({ isDeleted: { $ne: true } });
+        const totalShowtimes = await ShowtimeModel.countDocuments({ isDeleted: { $ne: true } });
 
         const revenueAgg = await BookingModel.aggregate([
-            { $match: { paymentStatus: "paid" } },
+            { $match: { paymentStatus: "paid", isDeleted: { $ne: true } } },
             { $group: { _id: null, total: { $sum: "$totalAmount" } } },
         ]);
 
         const revenue = (revenueAgg[0] && revenueAgg[0].total) || 0;
 
-        return { totalBookings, totalMovies, totalCinemas, revenue };
+        return { totalBookings, totalMovies, totalCinemas, totalShowtimes, revenue };
     }
 
     async listUsers() {
         const users = await userRepo.getAll();
         return users.filter((u) => u.role === "user");
+    }
+
+    async listAllBookings(params?: { cinemaId?: string; movieId?: string; userId?: string }) {
+        const query: any = { isDeleted: { $ne: true } };
+        if (params?.cinemaId) query.cinemaId = new mongoose.Types.ObjectId(params.cinemaId);
+        if (params?.movieId) query.movieId = new mongoose.Types.ObjectId(params.movieId);
+        if (params?.userId) query.userId = new mongoose.Types.ObjectId(params.userId);
+
+        return BookingModel.find(query)
+            .populate("userId", "name email username")
+            .populate("movieId", "title slug")
+            .populate("cinemaId", "name")
+            .populate("showtimeId", "showDate startTime endTime")
+            .sort({ createdAt: -1 })
+            .lean();
     }
 
     async getUserDetails(userId: string) {
@@ -33,7 +57,7 @@ export class AdminService {
             throw new Error("User not found");
         }
 
-        const bookings = await BookingModel.find({ userId })
+        const bookings = await BookingModel.find({ userId, isDeleted: { $ne: true } })
             .populate("movieId", "title slug language duration genres")
             .populate("cinemaId", "name")
             .populate("showtimeId", "startTime endTime hallId")
@@ -135,10 +159,81 @@ export class AdminService {
     }
 
     async deleteUser(userId: string) {
-        const deleted = await userRepo.delete(userId);
-        if (!deleted) {
-            throw new Error("User not found");
-        }
+        await userRepo.update(userId, { isActive: false, updatedAt: new Date() });
+    }
+
+    async listShowtimes(params?: { cinemaId?: string; movieId?: string; hallId?: string }) {
+        const query: any = { isDeleted: { $ne: true } };
+        if (params?.cinemaId) query.cinemaId = new mongoose.Types.ObjectId(params.cinemaId);
+        if (params?.movieId) query.movieId = new mongoose.Types.ObjectId(params.movieId);
+        if (params?.hallId) query.hallId = new mongoose.Types.ObjectId(params.hallId);
+
+        return ShowtimeModel.find(query)
+            .populate("movieId", "title slug")
+            .populate("cinemaId", "name")
+            .populate("hallId", "name")
+            .sort({ showDate: 1, startTime: 1 })
+            .lean();
+    }
+
+    async getShowtime(id: string) {
+        const showtime = await ShowtimeModel.findOne({ _id: id, isDeleted: { $ne: true } }).lean();
+        if (!showtime) throw new Error("Showtime not found");
+        return showtime;
+    }
+
+    async updateShowtime(id: string, payload: any) {
+        const showtime = await ShowtimeModel.findOneAndUpdate(
+            { _id: id, isDeleted: { $ne: true } },
+            payload,
+            { new: true }
+        ).lean();
+        if (!showtime) throw new Error("Showtime not found");
+        return showtime;
+    }
+
+    async deleteShowtime(id: string) {
+        const showtime = await ShowtimeModel.findOneAndUpdate(
+            { _id: id, isDeleted: { $ne: true } },
+            { isDeleted: true, deletedAt: new Date() },
+            { new: true }
+        ).lean();
+        if (!showtime) throw new Error("Showtime not found");
+        return showtime;
+    }
+
+    async listHalls(params?: { cinemaId?: string; name?: string }) {
+        const query: any = { isDeleted: { $ne: true } };
+        if (params?.cinemaId) query.cinemaId = new mongoose.Types.ObjectId(params.cinemaId);
+        if (params?.name) query.name = { $regex: params.name, $options: "i" };
+
+        return HallModel.find(query).sort({ createdAt: -1 }).lean();
+    }
+
+    async getHall(id: string) {
+        const hall = await HallModel.findOne({ _id: id, isDeleted: { $ne: true } }).lean();
+        if (!hall) throw new Error("Hall not found");
+        return hall;
+    }
+
+    async updateHall(id: string, payload: any) {
+        const hall = await HallModel.findOneAndUpdate(
+            { _id: id, isDeleted: { $ne: true } },
+            payload,
+            { new: true }
+        ).lean();
+        if (!hall) throw new Error("Hall not found");
+        return hall;
+    }
+
+    async deleteHall(id: string) {
+        const hall = await HallModel.findOneAndUpdate(
+            { _id: id, isDeleted: { $ne: true } },
+            { isDeleted: true, deletedAt: new Date() },
+            { new: true }
+        ).lean();
+        if (!hall) throw new Error("Hall not found");
+        return hall;
     }
 }
 
