@@ -16,6 +16,9 @@ export interface IMovie extends Document {
     director?: string;
     status: "now_showing" | "upcoming" | "archived";
     featured?: boolean;
+    isDeleted: boolean;
+    deletedAt?: Date;
+    deletedBy?: mongoose.Types.ObjectId;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -41,6 +44,9 @@ const MovieSchema: Schema = new Schema<IMovie>(
             default: "upcoming",
         },
         featured: { type: Boolean, default: false },
+        isDeleted: { type: Boolean, default: false },
+        deletedAt: { type: Date },
+        deletedBy: { type: Schema.Types.ObjectId, ref: "User" },
     },
     { timestamps: true }
 );
