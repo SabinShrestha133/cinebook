@@ -57,6 +57,21 @@ export const SEAT_STATUSES = {
 
 export type SeatStatus = (typeof SEAT_STATUSES)[keyof typeof SEAT_STATUSES];
 
+export const PERMISSIONS = {
+    MOVIE_CREATE: "movie:create",
+    MOVIE_UPDATE: "movie:update",
+    SHOWTIME_CREATE: "showtime:create",
+    SHOWTIME_UPDATE: "showtime:update",
+    SHOWTIME_DELETE: "showtime:delete",
+    CINEMA_MANAGE: "cinema:manage",
+    HALL_MANAGE: "hall:manage",
+    BOOKING_VIEW: "booking:view",
+    USER_MANAGE: "user:manage",
+    DISCOUNT_MANAGE: "discount:manage",
+} as const;
+
+export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
+
 export const DEFAULT_PAGE = 1;
 export const DEFAULT_LIMIT = 10;
 export const MAX_LIMIT = 100;
