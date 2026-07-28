@@ -2,6 +2,7 @@ import { getDashboardSummary, createMovie, createShowtime, listUsers, getUserDet
 import { updateMovie, type Movie } from "../api/movie";
 import { createCinema, updateCinema, type CreateCinemaPayload, type Cinema } from "../api/cinema";
 import { type DashboardSummary, type AdminUser, type UserDetails, type AdminBooking } from "../api/admin";
+import { createDayDiscount, updateDayDiscount, deleteDayDiscount, fetchDayDiscounts, type DayDiscount } from "../api/day-discount";
 
 export const handleGetDashboard = async (): Promise<{ success: boolean; data?: DashboardSummary; message?: string }> => {
     try {
@@ -115,6 +116,49 @@ export const handleListAllBookings = async (
 ): Promise<{ success: boolean; data?: AdminBooking[]; message?: string }> => {
     try {
         const data = await listAllBookings(params);
+        return { success: true, data };
+    } catch (error: unknown) {
+        return { success: false, message: (error as Error).message };
+    }
+};
+
+export const handleCreateDayDiscount = async (
+    data: Partial<DayDiscount>
+): Promise<{ success: boolean; data?: DayDiscount; message?: string }> => {
+    try {
+        const dataOut = await createDayDiscount(data);
+        return { success: true, data: dataOut };
+    } catch (error: unknown) {
+        return { success: false, message: (error as Error).message };
+    }
+};
+
+export const handleUpdateDayDiscount = async (
+    id: string,
+    data: Partial<DayDiscount>
+): Promise<{ success: boolean; data?: DayDiscount; message?: string }> => {
+    try {
+        const dataOut = await updateDayDiscount(id, data);
+        return { success: true, data: dataOut };
+    } catch (error: unknown) {
+        return { success: false, message: (error as Error).message };
+    }
+};
+
+export const handleDeleteDayDiscount = async (
+    id: string
+): Promise<{ success: boolean; message?: string }> => {
+    try {
+        await deleteDayDiscount(id);
+        return { success: true };
+    } catch (error: unknown) {
+        return { success: false, message: (error as Error).message };
+    }
+};
+
+export const handleListDayDiscounts = async (): Promise<{ success: boolean; data?: DayDiscount[]; message?: string }> => {
+    try {
+        const data = await fetchDayDiscounts();
         return { success: true, data };
     } catch (error: unknown) {
         return { success: false, message: (error as Error).message };
