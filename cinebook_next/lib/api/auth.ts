@@ -108,3 +108,43 @@ export const logout = () => {
     removeToken();
 };
 
+export const requestPasswordReset = async (email: string) => {
+    try {
+        const response = await publicAxios.post(
+            API.AUTH.REQUEST_PASSWORD_RESET,
+            { email }
+        );
+        return response.data;
+    } catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+            throw new Error(
+                error.response?.data?.message || "Request password reset failed"
+            );
+        }
+        if (error instanceof Error) {
+            throw new Error(error.message || "Request password reset failed");
+        }
+        throw new Error("Request password reset failed");
+    }
+};
+
+export const resetPassword = async (token: string, newPassword: string) => {
+    try {
+        const response = await publicAxios.post(
+            API.AUTH.RESET_PASSWORD(token),
+            { newPassword }
+        );
+        return response.data;
+    } catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+            throw new Error(
+                error.response?.data?.message || "Reset password failed"
+            );
+        }
+        if (error instanceof Error) {
+            throw new Error(error.message || "Reset password failed");
+        }
+        throw new Error("Reset password failed");
+    }
+};
+
