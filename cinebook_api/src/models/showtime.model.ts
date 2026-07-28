@@ -14,9 +14,14 @@ export interface IShowtime extends Document {
     startTime: string;
     endTime: string;
     ticketPrice: number;
-    bookedSeats: string[]; // array of confirmed seatIds
-    reservations: IReservation[]; // temporary holds with expiry
+    discountType: "none" | "percentage" | "fixed";
+    discountValue: number;
+    bookedSeats: string[];
+    reservations: IReservation[];
     status: "active" | "cancelled" | "completed";
+    isDeleted: boolean;
+    deletedAt?: Date;
+    deletedBy?: mongoose.Types.ObjectId;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -36,9 +41,14 @@ const ShowtimeSchema: Schema = new Schema<IShowtime>(
         startTime: { type: String, required: true },
         endTime: { type: String },
         ticketPrice: { type: Number, required: true },
+        discountType: { type: String, enum: ["none", "percentage", "fixed"], default: "none" },
+        discountValue: { type: Number, default: 0 },
         bookedSeats: { type: [String], default: [] },
         reservations: { type: [ReservationSchema], default: [] },
         status: { type: String, enum: ["active", "cancelled", "completed"], default: "active" },
+        isDeleted: { type: Boolean, default: false },
+        deletedAt: { type: Date },
+        deletedBy: { type: Schema.Types.ObjectId, ref: "User" },
     },
     { timestamps: true }
 );
