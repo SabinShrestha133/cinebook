@@ -21,6 +21,9 @@ export interface IBooking extends Document {
     bookingCode: string;
     ticketJwt?: string;
     khaltiPidx?: string;
+    isDeleted: boolean;
+    deletedAt?: Date;
+    deletedBy?: mongoose.Types.ObjectId;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -54,6 +57,9 @@ const BookingSchema: Schema = new Schema<IBooking>(
         bookingCode: { type: String, required: true, unique: true },
         ticketJwt: { type: String, required: false },
         khaltiPidx: { type: String, required: false, index: true },
+        isDeleted: { type: Boolean, default: false },
+        deletedAt: { type: Date },
+        deletedBy: { type: Schema.Types.ObjectId, ref: "User" },
     },
     { timestamps: true }
 );

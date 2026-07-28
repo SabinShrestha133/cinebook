@@ -50,13 +50,18 @@ function BookingsContent() {
         switch (status) {
             case "confirmed":
             case "paid":
+            case "checked_in":
                 return "bg-green-500/10 text-green-400";
             case "cancelled":
             case "refunded":
             case "failed":
+            case "expired":
                 return "bg-red-500/10 text-red-400";
-            default:
+            case "reserved":
+            case "pending_payment":
                 return "bg-yellow-500/10 text-yellow-400";
+            default:
+                return "bg-gray-500/10 text-gray-400";
         }
     };
 

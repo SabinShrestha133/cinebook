@@ -25,6 +25,7 @@ import seatRoutes from "./routes/seat.route";
 import cinemaRoutes from "./routes/cinema.route";
 import aiRecommendationRoutes from "./routes/ai-recommendation.route";
 import seatRecommendationRoutes from "./routes/seat-recommendation.route";
+import dayDiscountRoutes from "./routes/day-discount.route";
 
 import { PORT, HOST } from "./configs/constant";
 import { bookingService } from "./services/booking.service";
@@ -186,6 +187,12 @@ app.use(
 app.use(
     "/api/v1/super-admin",
     superAdminRoutes
+);
+
+// Day discounts
+app.use(
+    "/api/v1/day-discounts",
+    dayDiscountRoutes
 );
 
 

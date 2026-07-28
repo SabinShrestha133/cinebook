@@ -7,6 +7,17 @@ export class CinemaService {
         return cinemaRepo.find({}, { sort: { createdAt: -1 } });
     }
 
+    async createCinema(payload: any) {
+        return cinemaRepo.create(payload);
+    }
+
+    async updateCinema(id: string, payload: any) {
+        return cinemaRepo.update(id, payload);
+    }
+
+    async deleteCinema(id: string, deletedBy: string) {
+        return cinemaRepo.softDelete(id, deletedBy);
+    }
     async createCinema(payload: Record<string, unknown>) {
         return cinemaRepo.create(payload);
     }

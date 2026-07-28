@@ -1,5 +1,7 @@
 import { BookingRepository } from "../repositories/booking.repository";
 import { showtimeService } from "./showtime.service";
+import { dayDiscountService } from "./day-discount.service";
+import { calculateEffectivePrice } from "../utils/pricing.util";
 import { paymentService } from "./payment.service";
 import { v4 as uuidv4 } from "uuid";
 import jwt from "jsonwebtoken";
@@ -15,8 +17,25 @@ export class BookingService {
         const { showtimeId, seats, userId, movieId, cinemaId, hallId } = payload;
         const seatIds = seats.map((s: any) => s.seatId);
 
-        const totalAmount = seats.reduce((acc: number, s: any) => acc + (s.price || 0), 0);
+        const showtime = await showtimeService.getShowtime(showtimeId);
+        if (!showtime) {
+            throw new Error("Showtime not found");
+        }
+
+        const discounts = await dayDiscountService.getEffectiveDiscountsForShowtime(showtime.showDate, {
+            discountType: showtime.discountType,
+            discountValue: showtime.discountValue,
+        });
+
+        const effectivePrice = calculateEffectivePrice(showtime.ticketPrice, discounts);
+        const totalAmount = seatIds.length * effectivePrice;
         const expiresAt = new Date(Date.now() + paymentService.getExpiryMinutes() * 60 * 1000);
+
+        const seatsWithPrice = seatIds.map((seatId: string) => ({
+            seatId,
+            label: seatId,
+            price: effectivePrice,
+        }));
 
         const booking = await bookingRepo.create({
             userId,
@@ -24,17 +43,20 @@ export class BookingService {
             cinemaId,
             hallId,
             showtimeId,
-            seats,
+            seats: seatsWithPrice,
             seatCount: seats.length,
             totalAmount,
-            bookingStatus: BookingStatus.PendingPayment,
+            bookingStatus: BookingStatus.Reserved,
             paymentStatus: PaymentStatus.Pending,
             bookingCode: uuidv4().split("-")[0].toUpperCase(),
         });
 
         const reserved = await showtimeService.reserveSeats(showtimeId, seatIds, booking._id.toString(), expiresAt);
         if (!reserved) {
-            await bookingRepo.delete(booking._id.toString());
+            await bookingRepo.update(booking._id.toString(), {
+                bookingStatus: BookingStatus.Cancelled,
+                paymentStatus: PaymentStatus.Failed,
+            });
             throw new Error("One or more seats are already booked or reserved by another user");
         }
 
@@ -54,14 +76,14 @@ export class BookingService {
         if (!booking) {
             throw new Error("Booking not found");
         }
-        if (booking.bookingStatus !== BookingStatus.PendingPayment) {
-            throw new Error("Booking is not pending payment");
+        if (booking.bookingStatus !== BookingStatus.Reserved && booking.bookingStatus !== BookingStatus.PendingPayment) {
+            throw new Error("Booking is not awaiting payment");
         }
 
         const payment = await paymentService.initiatePayment(bookingId, booking.totalAmount, customerInfo);
 
-        // Save pidx on booking so we can look it up during verification
         await bookingRepo.update(bookingId, {
+            bookingStatus: BookingStatus.PendingPayment,
             khaltiPidx: payment.pidx,
         });
 
@@ -71,7 +93,6 @@ export class BookingService {
     async verifyPayment(pidx: string) {
         const verification = await paymentService.verifyPayment(pidx);
 
-        // Look up booking by the pidx we saved during initiation
         const booking = await bookingRepo.findOne({ khaltiPidx: pidx });
 
         if (!booking) {
@@ -136,14 +157,14 @@ export class BookingService {
         return bookingRepo.findById(bookingId);
     }
 
-    async cancelBooking(bookingId: string) {
+    async cancelBooking(bookingId: string, status = BookingStatus.Cancelled) {
         const booking = await bookingRepo.findById(bookingId);
         if (!booking) throw new Error("Booking not found");
 
         await showtimeService.unreserveSeats(booking.showtimeId.toString(), bookingId);
 
         await bookingRepo.update(bookingId, {
-            bookingStatus: BookingStatus.Cancelled,
+            bookingStatus: status,
             paymentStatus: PaymentStatus.Failed,
         });
 
@@ -204,7 +225,7 @@ export class BookingService {
 
         for (const booking of expiredBookings) {
             try {
-                await this.cancelBooking(booking._id.toString());
+                await this.cancelBooking(booking._id.toString(), BookingStatus.Expired);
             } catch (err) {
                 console.error(`Failed to cancel expired booking ${booking._id}:`, err);
             }

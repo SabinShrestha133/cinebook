@@ -41,6 +41,7 @@ export class MovieController {
     async update(req: Request, res: Response) {
         try {
             const id = String(req.params.id);
+            const movie = await movieService.update(id, req.body);
             const parsed = updateMovieSchema.parse(req.body);
             const movie = await movieService.update(id, parsed);
             if (!movie) return ApiResponseHelper.error(res, "Not found", 404);

@@ -28,6 +28,7 @@ const UserMongoSchema: Schema = new Schema<IUser>(
             default: [],
         },
         profilePicture: { type: String },
+        permissions: { type: [String], default: [] },
         isActive: { type: Boolean, default: true },
         isVerified: { type: Boolean, default: false },
     },

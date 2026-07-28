@@ -36,6 +36,8 @@ export class SuperAdminController {
     async updateAdmin(req: Request, res: Response) {
         try {
             const id = String(req.params.id);
+            const payload = req.body;
+            const updated = await superAdminService.updateAdmin(id, payload);
             const { isActive, permissions } = req.body;
             const updated = await superAdminService.updateAdmin(id, {
                 ...(typeof isActive === "boolean" ? { isActive } : {}),

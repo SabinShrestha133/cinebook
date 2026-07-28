@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { handleGetDashboard } from "@/lib/actions/admin-action";
 import { type DashboardSummary } from "@/lib/api/admin";
-import { Loader2, Ticket, Film, Building2, DollarSign, CalendarPlus, Users, LayoutGrid, BarChart3 } from "lucide-react";
+import { Loader2, Ticket, Film, Building2, DollarSign, CalendarPlus, Users, LayoutGrid, BarChart3, Percent } from "lucide-react";
 
 function AdminDashboardContent() {
     const [summary, setSummary] = useState<DashboardSummary | null>(null);
@@ -36,9 +36,10 @@ function AdminDashboardContent() {
         ? [
               { label: "Total Bookings", value: summary.totalBookings, icon: Ticket },
               { label: "Total Movies", value: summary.totalMovies, icon: Film },
-              { label: "Total Cinemas", value: summary.totalCinemas, icon: Building2 },
-              {
-                  label: "Revenue (Paid)",
+{ label: "Total Cinemas", value: summary.totalCinemas, icon: Building2 },
+            { label: "Total Showtimes", value: summary.totalShowtimes, icon: CalendarPlus },
+            {
+                label: "Revenue (Paid)",
                   value: `Rs. ${summary.revenue.toLocaleString()}`,
                   icon: DollarSign,
               },
@@ -50,8 +51,9 @@ function AdminDashboardContent() {
         { href: "/admin/users", label: "Users", icon: Users },
         { href: "/admin/movies", label: "Movies", icon: Film },
         { href: "/admin/cinemas", label: "Cinemas", icon: Building2 },
-        { href: "/admin/showtimes/new", label: "New Showtime", icon: CalendarPlus },
-        { href: "/admin/halls/new", label: "New Hall", icon: LayoutGrid },
+        { href: "/admin/showtimes", label: "Showtimes", icon: CalendarPlus },
+        { href: "/admin/halls", label: "Halls", icon: LayoutGrid },
+        { href: "/admin/discounts", label: "Discounts", icon: Percent },
     ];
 
     return (

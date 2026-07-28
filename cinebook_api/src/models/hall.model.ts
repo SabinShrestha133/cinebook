@@ -6,6 +6,9 @@ export interface IHall extends Document {
     totalRows: number;
     seatsPerRow: number;
     aisles: number[];
+    isDeleted: boolean;
+    deletedAt?: Date;
+    deletedBy?: mongoose.Types.ObjectId;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -17,6 +20,9 @@ const HallSchema: Schema = new Schema<IHall>(
         totalRows: { type: Number, required: true },
         seatsPerRow: { type: Number, required: true },
         aisles: [{ type: Number }],
+        isDeleted: { type: Boolean, default: false },
+        deletedAt: { type: Date },
+        deletedBy: { type: Schema.Types.ObjectId, ref: "User" },
     },
     { timestamps: true }
 );

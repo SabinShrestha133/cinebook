@@ -1,8 +1,10 @@
 export enum BookingStatus {
     PendingPayment = "pending_payment",
+    Reserved = "reserved",
     Confirmed = "confirmed",
-    Cancelled = "cancelled",
     CheckedIn = "checked_in",
+    Cancelled = "cancelled",
+    Expired = "expired",
 }
 
 export enum PaymentStatus {

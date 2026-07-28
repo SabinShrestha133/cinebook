@@ -4,7 +4,6 @@ const movieRepo = new MovieRepository();
 
 export class MovieService {
     async createMovie(payload: any) {
-        // slug generation could be improved
         if (!payload.slug && payload.title) {
             payload.slug = payload.title.toLowerCase().replace(/\s+/g, "-");
         }
@@ -23,8 +22,8 @@ export class MovieService {
         return movieRepo.update(id, payload);
     }
 
-    async delete(id: string) {
-        return movieRepo.delete(id);
+    async delete(id: string, deletedBy: string) {
+        return movieRepo.softDelete(id, deletedBy);
     }
 }
 

@@ -15,6 +15,7 @@ export class CinemaController {
 
     async create(req: Request, res: Response) {
         try {
+            const cinema = await cinemaService.createCinema(req.body);
             const parsed = createCinemaSchema.parse(req.body);
             const cinema = await cinemaService.createCinema(parsed);
             return ApiResponseHelper.success(res, cinema, "Cinema created", 201);
@@ -26,6 +27,7 @@ export class CinemaController {
     async update(req: Request, res: Response) {
         try {
             const id = String(req.params.id);
+            const cinema = await cinemaService.updateCinema(id, req.body);
             const parsed = updateCinemaSchema.parse(req.body);
             const cinema = await cinemaService.updateCinema(id, parsed);
             if (!cinema) return ApiResponseHelper.error(res, "Not found", 404);

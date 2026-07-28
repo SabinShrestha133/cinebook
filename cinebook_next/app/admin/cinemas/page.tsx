@@ -58,38 +58,51 @@ function AdminCinemasContent() {
                     No cinemas available yet.
                 </div>
             ) : (
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {cinemas.map((cinema) => (
-                        <div
-                            key={cinema._id}
-                            className="bg-[#1a1a1a] border border-white/5 rounded-2xl p-5 flex flex-col gap-3"
-                        >
-                            <div className="flex items-start justify-between gap-3">
-                                <div>
-                                    <h3 className="text-white font-semibold">{cinema.name}</h3>
-                                    <p className="text-gray-500 text-xs uppercase tracking-wide mt-1">
-                                        {cinema.city || "No city"}
-                                    </p>
-                                </div>
-                                <Link
-                                    href={`/admin/cinemas/${cinema._id}/edit`}
-                                    className="flex items-center gap-1 rounded-full bg-white/5 border border-white/10 px-3 py-1.5 text-xs text-yellow-300 hover:border-yellow-400 transition"
-                                >
-                                    <Pencil className="w-3 h-3" /> Edit
-                                </Link>
-                            </div>
-                            <p className="text-gray-400 text-sm line-clamp-2">
-                                {cinema.address || "No address provided."}
-                            </p>
-                            <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] uppercase tracking-[0.2em] text-gray-400">
-                                {cinema.contactPhone && <span>{cinema.contactPhone}</span>}
-                                {cinema.contactEmail && <span>{cinema.contactEmail}</span>}
-                                <span className={cinema.isActive ? "text-emerald-300" : "text-rose-300"}>
-                                    {cinema.isActive ? "Active" : "Inactive"}
-                                </span>
-                            </div>
-                        </div>
-                    ))}
+                <div className="bg-[#1a1a1a] border border-white/5 rounded-2xl overflow-hidden">
+                    <table className="w-full text-sm">
+                        <thead>
+                            <tr className="text-gray-500 text-xs uppercase tracking-wide border-b border-white/5">
+                                <th className="text-left font-medium px-6 py-4">Name</th>
+                                <th className="text-left font-medium px-6 py-4">City</th>
+                                <th className="text-left font-medium px-6 py-4">Contact</th>
+                                <th className="text-left font-medium px-6 py-4">Status</th>
+                                <th className="text-right font-medium px-6 py-4">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {cinemas.map((cinema) => (
+                                <tr key={cinema._id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition">
+                                    <td className="px-6 py-4">
+                                        <div>
+                                            <p className="text-white font-medium">{cinema.name}</p>
+                                            <p className="text-gray-500 text-xs mt-0.5 line-clamp-1">{cinema.address || "—"}</p>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 text-gray-400">{cinema.city || "—"}</td>
+                                    <td className="px-6 py-4 text-gray-400">
+                                        <div className="flex flex-col gap-0.5">
+                                            {cinema.contactPhone && <span>{cinema.contactPhone}</span>}
+                                            {cinema.contactEmail && <span>{cinema.contactEmail}</span>}
+                                            {!cinema.contactPhone && !cinema.contactEmail && <span>—</span>}
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${cinema.isActive ? "bg-emerald-500/10 text-emerald-400" : "bg-rose-500/10 text-rose-400"}`}>
+                                            {cinema.isActive ? "Active" : "Inactive"}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4 text-right">
+                                        <Link
+                                            href={`/admin/cinemas/${cinema._id}/edit`}
+                                            className="inline-flex items-center gap-1 rounded-full bg-white/5 border border-white/10 px-3 py-1.5 text-xs text-yellow-300 hover:border-yellow-400 transition"
+                                        >
+                                            <Pencil className="w-3 h-3" /> Edit
+                                        </Link>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
             )}
         </div>
