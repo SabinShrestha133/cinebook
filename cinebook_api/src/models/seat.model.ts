@@ -9,6 +9,9 @@ export interface ISeat extends Document {
     seatType: "regular" | "premium" | "vip";
     status: "active" | "disabled" | "hidden" | "missing";
     positionIndex: number;
+    isDeleted: boolean;
+    deletedAt?: Date;
+    deletedBy?: mongoose.Types.ObjectId;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -23,6 +26,9 @@ const SeatSchema: Schema = new Schema<ISeat>(
         seatType: { type: String, enum: ["regular", "premium", "vip"], default: "regular" },
         status: { type: String, enum: ["active", "disabled", "hidden", "missing"], default: "active" },
         positionIndex: { type: Number, required: true },
+        isDeleted: { type: Boolean, default: false },
+        deletedAt: { type: Date },
+        deletedBy: { type: Schema.Types.ObjectId, ref: "User" },
     },
     { timestamps: true }
 );
