@@ -18,6 +18,8 @@ function CreateShowtimeContent() {
         startTime: "",
         endTime: "",
         ticketPrice: "",
+        discountType: "none",
+        discountValue: "",
     });
     const [movies, setMovies] = useState<Movie[]>([]);
     const [cinemas, setCinemas] = useState<Cinema[]>([]);
@@ -69,6 +71,10 @@ function CreateShowtimeContent() {
             ticketPrice: Number(form.ticketPrice),
         };
         if (form.endTime) payload.endTime = form.endTime;
+        if (form.discountType && form.discountType !== "none") {
+            payload.discountType = form.discountType;
+            payload.discountValue = Number(form.discountValue);
+        }
 
         const res = await handleCreateShowtime(payload);
         setLoading(false);
@@ -149,6 +155,19 @@ function CreateShowtimeContent() {
                 <Field label="Ticket Price (Rs.) *">
                     <input name="ticketPrice" type="number" value={form.ticketPrice} onChange={handleChange} required min={0} className={inputClass} placeholder="120" />
                 </Field>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <Field label="Discount Type">
+                        <select name="discountType" value={form.discountType} onChange={handleChange} className={selectClass}>
+                            <option value="none">No Discount</option>
+                            <option value="percentage">Percentage</option>
+                            <option value="fixed">Fixed Amount</option>
+                        </select>
+                    </Field>
+                    <Field label="Discount Value">
+                        <input name="discountValue" type="number" value={form.discountValue} onChange={handleChange} min={0} className={inputClass} placeholder="e.g. 10 or 50" disabled={form.discountType === "none"} />
+                    </Field>
+                </div>
 
                 <button
                     type="submit"
