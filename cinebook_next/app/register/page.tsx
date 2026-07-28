@@ -47,7 +47,7 @@ export default function RegisterPage() {
     }, [router, startTransition]);
 
     return (
-        <div className="min-h-screen bg-black flex items-center justify-center p-6 relative">
+        <div className="min-h-screen bg-[var(--bg-primary)] flex items-center justify-center p-6 relative">
             <div
                 className="fixed inset-0 pointer-events-none opacity-[0.03] z-0"
                 style={{
@@ -57,21 +57,21 @@ export default function RegisterPage() {
                 }}
             />
 
-            <div className="relative z-10 w-full max-w-sm bg-[#1a1a1a] rounded-2xl shadow-2xl px-8 py-10 border border-white/5">
+            <div className="relative z-10 w-full max-w-sm bg-[var(--card-bg)] rounded-2xl shadow-2xl px-8 py-10 border border-[var(--card-border)]">
                 <div className="flex flex-col items-center mb-8">
                     <div className="mb-3">
                         <Image src={logo} alt="CineBook Logo" width={52} height={52} className="w-auto h-auto" />
                     </div>
-                    <h1 className="text-white text-2xl font-bold tracking-[0.15em] uppercase">
+                    <h1 className="text-[var(--text-primary)] text-2xl font-bold tracking-[0.15em] uppercase">
                         Cine<span className="text-[#e63329]">Book</span>
                     </h1>
-                    <p className="text-gray-500 text-[10px] tracking-[0.25em] uppercase mt-1">Movie Ticket Booking System</p>
+                    <p className="text-[var(--text-tertiary)] text-[10px] tracking-[0.25em] uppercase mt-1">Movie Ticket Booking System</p>
                     <div className="w-8 h-px bg-[#e63329] mt-3" />
                 </div>
 
                 <div className="text-center mb-7">
-                    <h2 className="text-white text-lg font-semibold">Create Account</h2>
-                    <p className="text-gray-500 text-sm mt-1">Join CineBook to book movie tickets</p>
+                    <h2 className="text-[var(--text-primary)] text-lg font-semibold">Create Account</h2>
+                    <p className="text-[var(--text-tertiary)] text-sm mt-1">Join CineBook to book movie tickets</p>
                 </div>
 
                 {error && (
@@ -82,83 +82,83 @@ export default function RegisterPage() {
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
                     <div>
-                        <label className="block text-gray-400 text-xs font-medium mb-1 tracking-wide uppercase">
+                        <label className="block text-[var(--text-secondary)] text-xs font-medium mb-1 tracking-wide uppercase">
                             Full Name
                         </label>
                         <div className="relative">
-                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500">
+                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]">
                                 <User className="w-4 h-4" />
                             </span>
                             <input
                                 type="text"
                                 placeholder="John Doe"
                                 {...register("name")}
-                                className="w-full bg-[#111] border border-white/10 rounded-lg pl-10 pr-4 py-3 text-sm text-white placeholder-gray-600 outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400/20 transition"
+                                className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg pl-10 pr-4 py-3 text-sm text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400/20 transition"
                             />
                         </div>
                         {errors.name && <span className="text-red-400 text-xs mt-1 block">{errors.name.message}</span>}
                     </div>
 
                     <div>
-                        <label className="block text-gray-400 text-xs font-medium mb-1 tracking-wide uppercase">
+                        <label className="block text-[var(--text-secondary)] text-xs font-medium mb-1 tracking-wide uppercase">
                             Email Address
                         </label>
                         <div className="relative">
-                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500">
+                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]">
                                 <Mail className="w-4 h-4" />
                             </span>
                             <input
                                 type="email"
                                 placeholder="john@example.com"
                                 {...register("email")}
-                                className="w-full bg-[#111] border border-white/10 rounded-lg pl-10 pr-4 py-3 text-sm text-white placeholder-gray-600 outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400/20 transition"
+                                className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg pl-10 pr-4 py-3 text-sm text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400/20 transition"
                             />
                         </div>
                         {errors.email && <span className="text-red-400 text-xs mt-1 block">{errors.email.message}</span>}
                     </div>
 
                     <div>
-                        <label className="block text-gray-400 text-xs font-medium mb-1 tracking-wide uppercase">
+                        <label className="block text-[var(--text-secondary)] text-xs font-medium mb-1 tracking-wide uppercase">
                             Username
                         </label>
                         <div className="relative">
-                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500">
+                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]">
                                 <User className="w-4 h-4" />
                             </span>
                             <input
                                 type="text"
                                 placeholder="johndoe"
                                 {...register("username")}
-                                className="w-full bg-[#111] border border-white/10 rounded-lg pl-10 pr-4 py-3 text-sm text-white placeholder-gray-600 outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400/20 transition"
+                                className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg pl-10 pr-4 py-3 text-sm text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400/20 transition"
                             />
                         </div>
                         {errors.username && <span className="text-red-400 text-xs mt-1 block">{errors.username.message}</span>}
                     </div>
 
                     <div>
-                        <label className="block text-gray-400 text-xs font-medium mb-1 tracking-wide uppercase">
+                        <label className="block text-[var(--text-secondary)] text-xs font-medium mb-1 tracking-wide uppercase">
                             Phone Number
                         </label>
                         <div className="relative">
-                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500">
+                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]">
                                 <User className="w-4 h-4" />
                             </span>
                             <input
                                 type="tel"
                                 placeholder="+1234567890"
                                 {...register("phoneNumber")}
-                                className="w-full bg-[#111] border border-white/10 rounded-lg pl-10 pr-4 py-3 text-sm text-white placeholder-gray-600 outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400/20 transition"
+                                className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg pl-10 pr-4 py-3 text-sm text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400/20 transition"
                             />
                         </div>
                         {errors.phoneNumber && <span className="text-red-400 text-xs mt-1 block">{errors.phoneNumber.message}</span>}
                     </div>
 
                     <div>
-                        <label className="block text-gray-400 text-xs font-medium mb-1 tracking-wide uppercase">
+                        <label className="block text-[var(--text-secondary)] text-xs font-medium mb-1 tracking-wide uppercase">
                             Password
                         </label>
                         <div className="relative">
-                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500">
+                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]">
                                 <Lock className="w-4 h-4" />
                             </span>
                             <input
@@ -170,7 +170,7 @@ export default function RegisterPage() {
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition"
+                                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition"
                             >
                                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                             </button>
@@ -179,11 +179,11 @@ export default function RegisterPage() {
                     </div>
 
                     <div>
-                        <label className="block text-gray-400 text-xs font-medium mb-1 tracking-wide uppercase">
+                        <label className="block text-[var(--text-secondary)] text-xs font-medium mb-1 tracking-wide uppercase">
                             Confirm Password
                         </label>
                         <div className="relative">
-                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500">
+                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]">
                                 <Lock className="w-4 h-4" />
                             </span>
                             <input
@@ -195,7 +195,7 @@ export default function RegisterPage() {
                             <button
                                 type="button"
                                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition"
+                                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition"
                             >
                                 {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                             </button>
@@ -219,18 +219,18 @@ export default function RegisterPage() {
                     </button>
                 </form>
 
-                <div className="flex items-center gap-3 my-6">
-                    <div className="flex-1 h-px bg-white/8" />
-                    <span className="text-gray-600 text-xs">or</span>
-                    <div className="flex-1 h-px bg-white/8" />
-                </div>
+                    <div className="flex items-center gap-3 my-6">
+                        <div className="flex-1 h-px bg-[var(--border-color)]" />
+                        <span className="text-[var(--text-tertiary)] text-xs">or</span>
+                        <div className="flex-1 h-px bg-[var(--border-color)]" />
+                    </div>
 
-                <p className="text-center text-gray-500 text-sm">
-                    Already have an account?{" "}
-                    <Link href="/login" className="text-yellow-400 hover:text-yellow-300 font-semibold transition">
-                        Sign in
-                    </Link>
-                </p>
+                    <p className="text-center text-[var(--text-tertiary)] text-sm">
+                        Already have an account?{" "}
+                        <Link href="/login" className="text-yellow-400 hover:text-yellow-300 font-semibold transition">
+                            Sign in
+                        </Link>
+                    </p>
             </div>
         </div>
     );
