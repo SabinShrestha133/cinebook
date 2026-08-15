@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { movieController } from "../controllers/movie.controller";
-import { authenticate, adminMiddleware } from "../middlewares/authorized.middleware";
+import { authenticate, adminMiddleware, requirePermission } from "../middlewares/authorized.middleware";
+import { PERMISSIONS } from "../constants";
 import { validateBody } from "../middlewares/validate.middleware";
 import { permission } from "../middlewares/permission.middleware";
 import { audit } from "../middlewares/audit.middleware";
@@ -33,5 +34,7 @@ router.put(
     validateBody(updateMovieSchema),
     movieController.update.bind(movieController)
 );
+router.post("/", authenticate, adminMiddleware, requirePermission(PERMISSIONS.MOVIE_CREATE), uploads.single('poster'), validateBody(createMovieSchema), movieController.create.bind(movieController));
+router.put("/:id", authenticate, adminMiddleware, requirePermission(PERMISSIONS.MOVIE_UPDATE), validateBody(updateMovieSchema), movieController.update.bind(movieController));
 
 export default router;

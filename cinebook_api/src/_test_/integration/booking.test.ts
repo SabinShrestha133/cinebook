@@ -22,7 +22,6 @@ describe("Integration: Booking Routes", () => {
         await HallModel.deleteMany({});
         await CinemaModel.deleteMany({});
         await MovieModel.deleteMany({});
-
         const regRes = await request(app)
             .post("/api/v1/auth/register")
             .send({ name: "Booking User", email: "bookinguser@example.com", username: "bookinguser", password: "password123", phoneNumber: "1234567890" });
@@ -38,14 +37,6 @@ describe("Integration: Booking Routes", () => {
         hall = await HallModel.create({ cinemaId: cinema._id, name: "Hall 1", totalRows: 5, seatsPerRow: 8, aisles: [3] });
         showtime = await ShowtimeModel.create({ movieId: movie._id, cinemaId: cinema._id, hallId: hall._id, showDate: new Date(), startTime: "18:00", ticketPrice: 100 });
     });
-
-    afterAll(async () => {
-        await BookingModel.deleteMany({});
-        await ShowtimeModel.deleteMany({});
-        await HallModel.deleteMany({});
-        await CinemaModel.deleteMany({});
-        await MovieModel.deleteMany({});
-        await UserModel.deleteMany({});
     });
 
     describe("POST /api/v1/bookings", () => {
@@ -125,5 +116,14 @@ describe("Integration: Booking Routes", () => {
                 .get(`/api/v1/bookings/${bookingId}/qr`);
             expect(res.status).toBe(200);
         });
+    });
+
+    afterAll(async () => {
+        await BookingModel.deleteMany({});
+        await ShowtimeModel.deleteMany({});
+        await HallModel.deleteMany({});
+        await CinemaModel.deleteMany({});
+        await MovieModel.deleteMany({});
+        await UserModel.deleteMany({});
     });
 });

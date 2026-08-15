@@ -13,5 +13,9 @@ router.get("/hall/:hallId", seatController.getByHall.bind(seatController));
 router.patch("/:id/type", authenticate, adminMiddleware, permission("hall:manage"), audit("Seat", "UPDATE_SEAT_TYPE"), validateBody(updateSeatTypeSchema), seatController.updateType.bind(seatController));
 router.patch("/:id/status", authenticate, adminMiddleware, permission("hall:manage"), audit("Seat", "UPDATE_SEAT_STATUS"), validateBody(updateSeatStatusSchema), seatController.updateStatus.bind(seatController));
 router.post("/bulk-update", authenticate, adminMiddleware, permission("hall:manage"), audit("Seat", "BULK_UPDATE_SEATS"), validateBody(bulkUpdateSeatsSchema), seatController.bulkUpdate.bind(seatController));
+router.patch("/:id/type", authenticate, adminMiddleware, validateBody(updateSeatTypeSchema), seatController.updateType.bind(seatController));
+router.patch("/:id/status", authenticate, adminMiddleware, validateBody(updateSeatStatusSchema), seatController.updateStatus.bind(seatController));
+router.post("/bulk-update", authenticate, adminMiddleware, validateBody(bulkUpdateSeatsSchema), seatController.bulkUpdate.bind(seatController));
+router.get("/hall/:hallId", seatController.getByHall.bind(seatController));
 
 export default router;

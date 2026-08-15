@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { movieService } from "../services/movie.service";
 import { ApiResponseHelper } from "../utils/apihelper.util";
 import { uploadToCloudinary } from "../utils/cloudinary.util";
+import { updateMovieSchema } from "../validators/movie.validator";
 
 export class MovieController {
     async create(req: Request, res: Response) {
@@ -41,6 +42,8 @@ export class MovieController {
         try {
             const id = String(req.params.id);
             const movie = await movieService.update(id, req.body);
+            const parsed = updateMovieSchema.parse(req.body);
+            const movie = await movieService.update(id, parsed);
             if (!movie) return ApiResponseHelper.error(res, "Not found", 404);
             return ApiResponseHelper.success(res, movie, "Movie updated");
         } catch (err: any) {

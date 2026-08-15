@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { hallService } from "../services/hall.service";
 import { ApiResponseHelper } from "../utils/apihelper.util";
-import { createHallSchema, updateHallSchema, generateHallSchema } from "../validators/hall.validator";
+import { createHallSchema, updateHallSchema } from "../validators/hall.validator";
 import { validateBody } from "../middlewares/validate.middleware";
 import mongoose from "mongoose";
 

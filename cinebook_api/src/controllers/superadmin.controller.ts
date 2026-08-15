@@ -38,6 +38,11 @@ export class SuperAdminController {
             const id = String(req.params.id);
             const payload = req.body;
             const updated = await superAdminService.updateAdmin(id, payload);
+            const { isActive, permissions } = req.body;
+            const updated = await superAdminService.updateAdmin(id, {
+                ...(typeof isActive === "boolean" ? { isActive } : {}),
+                ...(Array.isArray(permissions) ? { permissions } : {}),
+            });
             return ApiResponseHelper.success(res, updated, "Admin updated");
         } catch (err: any) {
             return ApiResponseHelper.error(res, err.message || "Error updating admin", 500);

@@ -2,7 +2,7 @@ import { UserMongoRepository } from "../repositories/user.repository";
 import { CreateUserDTO, LoginUserDTO, UpdateUserDTO } from "../dtos/user.dto";
 import { IUser } from "../models/user.model";
 import { HttpException } from "../exceptions/http-exception";
-import bycryptjs from "bcryptjs";
+import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { CLIENT_URL, SECRET_KEY } from "../configs/constant";
 import { sendEmail } from "../configs/email";
@@ -38,7 +38,7 @@ export class UserService {
         }
 
         console.log("[SVC] comparing password...");
-        const isPasswordValid = await bycryptjs.compare(
+        const isPasswordValid = await bcryptjs.compare(
             loginData.password,
             user.password
         );
@@ -81,7 +81,7 @@ export class UserService {
                 throw new HttpException(400, "Current password is required");
             }
 
-            const isCurrentPasswordValid = await bycryptjs.compare(
+            const isCurrentPasswordValid = await bcryptjs.compare(
                 updateData.currentPassword,
                 user.password
             );
@@ -90,7 +90,7 @@ export class UserService {
                 throw new HttpException(400, "Current password is incorrect");
             }
 
-            const hashedPassword = await bycryptjs.hash(updateData.password, 10);
+            const hashedPassword = await bcryptjs.hash(updateData.password, 10);
             updateData.password = hashedPassword;
 
             delete (updateData as any).currentPassword;
@@ -127,7 +127,7 @@ export class UserService {
             if (!user) {
                 throw new HttpException(404, "User not found");
             }
-            const hashedPassword = await bycryptjs.hash(newPassword, 10);
+            const hashedPassword = await bcryptjs.hash(newPassword, 10);
             await userRepository.update(userId, { password: hashedPassword });
             return user;
         } catch (error) {

@@ -18,6 +18,13 @@ export class CinemaService {
     async deleteCinema(id: string, deletedBy: string) {
         return cinemaRepo.softDelete(id, deletedBy);
     }
+    async createCinema(payload: Record<string, unknown>) {
+        return cinemaRepo.create(payload);
+    }
+
+    async updateCinema(id: string, payload: Record<string, unknown>) {
+        return cinemaRepo.update(id, payload);
+    }
 }
 
 export const cinemaService = new CinemaService();

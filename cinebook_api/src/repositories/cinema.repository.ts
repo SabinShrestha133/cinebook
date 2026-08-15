@@ -29,4 +29,12 @@ export class CinemaRepository {
             { new: true }
         ).lean();
     }
+
+    async create(data: Partial<ICinema>) {
+        return CinemaModel.create(data);
+    }
+
+    async update(id: string, data: Partial<ICinema>) {
+        return CinemaModel.findByIdAndUpdate(id, data, { new: true }).lean();
+    }
 }

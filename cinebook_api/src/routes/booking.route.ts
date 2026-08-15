@@ -3,6 +3,7 @@ import { bookingController } from "../controllers/booking.controller";
 import { authenticate } from "../middlewares/authorized.middleware";
 import { validateBody } from "../middlewares/validate.middleware";
 import { createBookingSchema, initiatePaymentSchema, verifyPaymentSchema, verifyTicketSchema } from "../validators/booking.validator";
+import { createBookingSchema, initiatePaymentSchema, verifyPaymentSchema } from "../validators/booking.validator";
 
 const router = Router();
 
