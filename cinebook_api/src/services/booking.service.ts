@@ -59,7 +59,7 @@ export class BookingService {
             throw new Error("One or more seats are already booked or reserved by another user");
         }
 
-        return booking;
+        return this.confirmBooking(booking._id.toString());
     }
 
     async getBooking(id: string) {
