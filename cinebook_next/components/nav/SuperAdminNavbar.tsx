@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import { LogOut, ChevronDown, Shield, User, Film } from "lucide-react";
+import { LogOut, ChevronDown, Shield, User, Film, Users, Settings } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 
 export default function SuperAdminNavbar() {
@@ -63,11 +63,29 @@ export default function SuperAdminNavbar() {
                                     </div>
 
                                     <div className="py-1">
-                                        <Link href="/super-admin/dashboard" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--dropdown-hover)] transition">
-                                            <Shield className="w-4 h-4" /> Admin Panel
-                                        </Link>
                                         <Link href="/admin/dashboard" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--dropdown-hover)] transition">
-                                            <Film className="w-4 h-4" /> Admin Console
+                                            <Film className="w-4 h-4" /> Analytics
+                                        </Link>
+                                        <Link href="/super-admin/dashboard" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--dropdown-hover)] transition">
+                                            <Users className="w-4 h-4" /> Admin Management
+                                        </Link>
+                                        <Link href="/admin/users" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--dropdown-hover)] transition">
+                                            <User className="w-4 h-4" /> Users
+                                        </Link>
+                                        <Link href="/admin/movies" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--dropdown-hover)] transition">
+                                            <Film className="w-4 h-4" /> Movies
+                                        </Link>
+                                        <Link href="/admin/cinemas" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--dropdown-hover)] transition">
+                                            <Settings className="w-4 h-4" /> Cinemas & Halls
+                                        </Link>
+                                        <Link href="/admin/showtimes" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--dropdown-hover)] transition">
+                                            <Shield className="w-4 h-4" /> Showtimes
+                                        </Link>
+                                        <Link href="/admin/bookings" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--dropdown-hover)] transition">
+                                            <Shield className="w-4 h-4" /> Bookings
+                                        </Link>
+                                        <Link href="/admin/discounts" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--dropdown-hover)] transition">
+                                            <Shield className="w-4 h-4" /> Discounts
                                         </Link>
                                     </div>
 
