@@ -37,9 +37,11 @@ function BookingsContent() {
 
     const filtered = bookings.filter((b) => {
         const term = search.toLowerCase();
+        const userName = b.user?.name || "";
+        const userEmail = b.user?.email || "";
         return (
-            b.user.name.toLowerCase().includes(term) ||
-            b.user.email.toLowerCase().includes(term) ||
+            userName.toLowerCase().includes(term) ||
+            userEmail.toLowerCase().includes(term) ||
             b.movieTitle.toLowerCase().includes(term) ||
             b.cinemaName.toLowerCase().includes(term) ||
             b.bookingCode.toLowerCase().includes(term)
@@ -130,8 +132,8 @@ function BookingsContent() {
                                 filtered.map((b) => (
                                     <tr key={b._id} className="border-b border-white/5 last:border-0 align-top">
                                         <td className="px-4 py-3 text-white">
-                                            {b.user.name}
-                                            <div className="text-xs text-gray-500">{b.user.email}</div>
+                                            {b.user?.name || "Unknown User"}
+                                            <div className="text-xs text-gray-500">{b.user?.email || "—"}</div>
                                             <div className="text-[11px] text-gray-600">{b.bookingCode}</div>
                                         </td>
                                         <td className="px-4 py-3 text-white">
@@ -141,9 +143,9 @@ function BookingsContent() {
                                         </td>
                                         <td className="px-4 py-3 text-gray-400">{b.cinemaName}</td>
                                         <td className="px-4 py-3 text-gray-400">
-                                            {b.showtime.showDate ? new Date(b.showtime.showDate).toLocaleDateString() : "—"}
+                                            {b.showtime?.showDate ? new Date(b.showtime.showDate).toLocaleDateString() : "—"}
                                             <div className="text-xs text-gray-500">
-                                                {b.showtime.startTime}{b.showtime.endTime ? ` - ${b.showtime.endTime}` : ""}
+                                                {b.showtime?.startTime || "—"}{b.showtime?.endTime ? ` - ${b.showtime.endTime}` : ""}
                                             </div>
                                         </td>
                                         <td className="px-4 py-3 text-gray-300">

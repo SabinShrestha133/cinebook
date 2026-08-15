@@ -1,12 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { handleGetDashboard } from "@/lib/actions/admin-action";
 import { type DashboardSummary } from "@/lib/api/admin";
-import { Loader2, Ticket, Film, Building2, DollarSign, CalendarPlus, Users, LayoutGrid, BarChart3, Percent } from "lucide-react";
+import { Loader2, Ticket, Film, Building2, DollarSign, CalendarPlus, Users, LayoutGrid, BarChart3, Percent, KeyRound } from "lucide-react";
+import { isSuperAdmin } from "@/lib/utils/roles";
+import { useAuth } from "@/lib/contexts/AuthContext";
 
 function AdminDashboardContent() {
+    const { user } = useAuth();
     const [summary, setSummary] = useState<DashboardSummary | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -54,6 +57,7 @@ function AdminDashboardContent() {
         { href: "/admin/showtimes", label: "Showtimes", icon: CalendarPlus },
         { href: "/admin/halls", label: "Halls", icon: LayoutGrid },
         { href: "/admin/discounts", label: "Discounts", icon: Percent },
+        ...(isSuperAdmin(user?.role) ? [{ href: "/super-admin/dashboard", label: "Admin Panel", icon: KeyRound, superAdmin: true as const }] : []),
     ];
 
     return (
@@ -73,7 +77,9 @@ function AdminDashboardContent() {
                                 className={`flex flex-col items-center justify-center gap-2 rounded-2xl border px-4 py-4 text-center transition ${
                                     action.primary
                                         ? "bg-yellow-400 border-yellow-400 text-black hover:bg-yellow-300"
-                                        : "bg-white/5 border-white/10 text-white hover:border-yellow-400 hover:text-yellow-300"
+                                        : action.superAdmin
+                                            ? "bg-yellow-400/10 border-yellow-400/30 text-yellow-300 hover:border-yellow-400 hover:text-yellow-200"
+                                            : "bg-white/5 border-white/10 text-white hover:border-yellow-400 hover:text-yellow-300"
                                 }`}
                             >
                                 <Icon className="w-5 h-5" />

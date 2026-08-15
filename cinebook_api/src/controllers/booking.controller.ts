@@ -8,7 +8,7 @@ export class BookingController {
         try {
             const payload = { ...req.body, userId: req.user?._id };
             const booking = await bookingService.createBooking(payload);
-            return ApiResponseHelper.success(res, booking, "Booking created. Proceed to payment.", 201);
+            return ApiResponseHelper.success(res, booking, "Booking confirmed.", 201);
         } catch (err: any) {
             return ApiResponseHelper.error(res, err.message || "Error creating booking", 400);
         }

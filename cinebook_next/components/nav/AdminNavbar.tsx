@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { can, PERMISSIONS } from "@/lib/utils/permissions";
-import { LogOut, ChevronDown, Film, User, Shield, PlusCircle, CalendarDays, LayoutGrid, Building2, Ticket, Percent } from "lucide-react";
+import { isSuperAdmin } from "@/lib/utils/roles";
+import { LogOut, ChevronDown, Film, User, Shield, PlusCircle, CalendarDays, LayoutGrid, Building2, Ticket, Percent, KeyRound } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 
 export default function AdminNavbar() {
@@ -71,6 +72,11 @@ export default function AdminNavbar() {
                                         {canFn(PERMISSIONS.USER_MANAGE) && (
                                             <Link href="/admin/users" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--dropdown-hover)] transition">
                                                 <Shield className="w-4 h-4" /> Users
+                                            </Link>
+                                        )}
+                                        {isSuperAdmin(user?.role) && (
+                                            <Link href="/super-admin/dashboard" onClick={() => setDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--dropdown-hover)] transition">
+                                                <KeyRound className="w-4 h-4" /> Admin Panel
                                             </Link>
                                         )}
                                         {canFn(PERMISSIONS.BOOKING_VIEW) && (
